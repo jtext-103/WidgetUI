@@ -1,8 +1,8 @@
 module.exports = {
     devServer: {
       proxy: {
-        "/basepath": {
-          target: "http://localhost:8002/dataserver",
+        "/dataserver": {
+          target: "http://localhost:8002",
           secure: false,
           changeOrigin: true
         }
