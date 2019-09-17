@@ -17,31 +17,9 @@
         <button v-on:click="addWidget(availableWidget)">{{availableWidget}}</button>
       </div>
     </div>-->
-    <!-- <div v-for="(widget,index) in widgetList" :key="index">
+     <div v-for="(widget,index) in widgetList" :key="index">
       <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
-    </div> -->
-
-    <grid-layout
-            :layout.sync="layout"
-            :col-num="12"
-            :row-height="30"
-            :is-draggable="true"
-            :is-resizable="true"
-            :is-mirrored="false"
-            :vertical-compact="true"
-            :margin="[10, 10]"
-            :use-css-transforms="true"
-    >
-        <grid-item v-for="(widget) in widgetList"
-                   :x="layout[Number(widget.ref)].x"
-                   :y="layout[Number(widget.ref)].y"
-                   :w="layout[Number(widget.ref)].w"
-                   :h="layout[Number(widget.ref)].h"
-                   :i="layout[Number(widget.ref)].i"
-                   :key="layout[Number(widget.ref)].i">
-            <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
-        </grid-item>
-    </grid-layout>
+    </div> 
 
   </div>
 </template>
@@ -51,7 +29,6 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import axios from "axios";
-import {  GridItemData,GridLayout,GridItem} from 'vue-grid-layout';
 
 import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
@@ -71,14 +48,11 @@ import Config from "./components/Config/Config.vue";
     Status,
     WaveView,
     Method,
-    Config,
-    GridLayout,
-    GridItem
+    Config
   }
 })
 export default class App extends Vue {
   widgetList: WidgetRef[] = [];
-  layout:GridItemData[]=[];
   fileName: string = "config.json";
   private lastWidgetIndex: number = 0;
   isShowAddWidget: Boolean = false;
@@ -173,7 +147,6 @@ export default class App extends Vue {
     var newWidget = new WidgetRef();
     newWidget.widgetComponentName = widgetName;
     newWidget.ref = this.lastWidgetIndex.toString();
-    this.layout[this.lastWidgetIndex]= {"x":0,"y":this.lastWidgetIndex*4,"w":4,"h":4,"i":newWidget.ref},
     this.lastWidgetIndex++;
     this.widgetList = [...this.widgetList, newWidget];
   }
