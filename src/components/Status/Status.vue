@@ -1,14 +1,34 @@
 <template>
-  <div class="Status">
+  <!-- <b-card class="Status">
     <p>{{ config.data.url }}</p>
-    <p>{{ StatusValue }}</p>
     <button @click="showPathConfig">Setting</button>
+    <p>{{ StatusValue }}</p>
     <div v-show="isShowPath">
       <input v-model="config.data.url" />
       <button @click="updateUI">OK</button>
     </div>
     <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams>
-  </div>
+  </b-card> -->
+  <b-container class="bv-example-row">
+    <b-row style="margin-top:10px">
+      <b-col>
+        <span style="float:left;font-size:20px">path: {{ config.data.url }}</span>
+      </b-col>
+      <b-col>
+        <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
+      </b-col>
+      <hr />
+    </b-row>
+    <div style="width:100%">
+      <span style="float:left;font-size:20px">{{ StatusValue }}</span>
+      <hr />
+    </div>
+    <div v-show="isShowPath">
+      <input v-model="config.data.url" />
+      <button @click="updateUI">OK</button>
+    </div>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams>
+  </b-container>
 </template>
 
 <script lang="ts">
@@ -48,7 +68,6 @@ export default class Status extends Widget {
       userInputData: ""
     }
   };
-  tempUrl: string = "";
 
   created() {
     // this.config.data.userInputData = this.userInputData;
@@ -90,9 +109,15 @@ export default class Status extends Widget {
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
   }
 
+  replaceStartPath(startPath:string)
+  {
+
+  }
+
   parentUpdate(payload: UpdatePayload): void {
     
   }
+
   refresh() {
     var Args: UpdatePayload = {
       action: "get",
@@ -130,4 +155,5 @@ export default class Status extends Widget {
   width: 100%;
   height: auto;
 }
+
 </style>

@@ -1,25 +1,38 @@
 <template>
   <div id="app">
-    <div class="btn-group">
-      <ul>
-        <div v-for="(availableWidget,index) in availableWidgets" :key="index">
-          <li>
-            <a href="#" v-on:click="addWidget(availableWidget)">{{availableWidget}}</a>
-          </li>
-        </div>
-      </ul>
-    </div>
-    <button @click="saveWidgetList">Save</button>
-    <input id="file" type="file" @change="loadTextFromFile" />
-    <!-- <button @click="toggleShowAddWidget">Add</button>
-    <div v-show="isShowAddWidget">
-      <div v-for="(availableWidget,index) in availableWidgets" :key="index">
-        <button v-on:click="addWidget(availableWidget)">{{availableWidget}}</button>
-      </div>
-    </div>-->
-     <div v-for="(widget,index) in widgetList" :key="index">
-      <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
-    </div> 
+    <b-navbar class="Widget">
+      <b-dropdown id="dropdown-1" text="Add Widget" class="m-md-2" variant="primary">
+        <b-dropdown-item v-for="(availableWidget,index) in availableWidgets" :key="index">
+            <div v-on:click="addWidget(availableWidget)">{{availableWidget}}</div>
+        </b-dropdown-item>
+      </b-dropdown>
+      <b-button @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
+      <b-form-file  id="file" type="file" @change="loadTextFromFile" placeholder="Choose a widgetTemplate file to laod" accept=".json" style="width:30%;margin-left:2%" />
+    </b-navbar>
+    
+
+    <grid-layout
+            :layout.sync="widgetList"
+            :col-num="12"
+            :row-height="30"
+            :is-draggable="true"
+            :is-resizable="true"
+            :is-mirrored="false"
+            :vertical-compact="true"
+            :margin="[10, 10]"
+            :use-css-transforms="true"
+    >
+       <grid-item v-for="(widget) in widgetList"
+                   :x="widget.x"
+                   :y="widget.y"
+                   :w="widget.w"
+                   :h="widget.h"
+                   :i="widget.i"
+                   :key="widget.i">
+            <div style="height:20px;background-color:rgb(0, 123, 255)"> </div>
+            <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
+        </grid-item>
+    </grid-layout>
 
   </div>
 </template>
@@ -29,6 +42,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import axios from "axios";
+import {  GridItemData,GridLayout,GridItem} from 'vue-grid-layout';
 
 import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
@@ -48,7 +62,9 @@ import Config from "./components/Config/Config.vue";
     Status,
     WaveView,
     Method,
-    Config
+    Config,
+    GridLayout,
+    GridItem
   }
 })
 export default class App extends Vue {
@@ -65,22 +81,21 @@ export default class App extends Vue {
     this.isShowAddWidget = !this.isShowAddWidget;
   }
 
-  UIAutomaticGenerated() {
+  async UIAutomaticGenerated() {
     var fragment = window.location.hash;
     if (fragment != "#") {
-      axios
-        .get(" ")
-        .then(function(response) {
-          // handle success
-          console.log(response);
-        })
-        .catch(function(error) {
-          // handle error
-          console.log(error);
-        })
-        .then(function() {
-          // always executed
-        });
+      fragment = fragment.substring(1,fragment.length-1);
+      var customViewURL = "/customView" + fragment;
+      await axios.get(customViewURL).then(response => {
+        var widgets = Object.assign(
+        new AllWidgetConfig(),
+        JSON.parse(response.data.ObjectVal)
+      );
+       this.widgetList = widgets.widgetList;
+       this.lastWidgetIndex = Number(widgets.currentRef);
+       this.importActiveWidgetList();
+
+    });
     }
   }
 
@@ -147,6 +162,8 @@ export default class App extends Vue {
     var newWidget = new WidgetRef();
     newWidget.widgetComponentName = widgetName;
     newWidget.ref = this.lastWidgetIndex.toString();
+    newWidget.y=this.lastWidgetIndex*4;
+    newWidget.i=Number(newWidget.ref);
     this.lastWidgetIndex++;
     this.widgetList = [...this.widgetList, newWidget];
   }
@@ -171,6 +188,9 @@ export default class App extends Vue {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.Widget{
+  width: 100%;
+  border-color: rgb(206, 212, 218);
 }
 </style>

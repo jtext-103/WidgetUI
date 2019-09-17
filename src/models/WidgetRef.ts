@@ -6,4 +6,10 @@ export class WidgetRef {
   public widgetComponentName: string = '';
   public ref: string = '';
   public widgetConfig?: WidgetConfig;
+  //below is for grid layout
+  public x:number=0;
+  public y:number=0;
+  public w:number=4;
+  public h:number=4;
+  public i:number=0;
 }
