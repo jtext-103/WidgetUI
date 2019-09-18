@@ -37,10 +37,12 @@
         :h="widget.h"
         :i="widget.i"
         :key="widget.i"
+        drag-allow-from=".vue-draggable-handle"
+        drag-ignore-from=".no-drag"
       >
         <div style="border-color: rgb(206, 212, 218);">
-          <div style="height:20px;background-color:rgb(0, 123, 255)"></div>
-          <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
+          <div class="vue-draggable-handle" style="height:20px;background-color:rgb(0, 123, 255)"></div>
+          <component  class="no-drag" :is="widget.widgetComponentName" :ref="widget.ref"></component>
         </div>
       </grid-item>
     </grid-layout>

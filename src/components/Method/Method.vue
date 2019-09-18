@@ -10,7 +10,7 @@
       <hr />
     </b-row>
     <div style="width:100%">
-      <span style="float:left;font-size:20px">{{ StatusValue }}</span>
+      <span style="float:left;font-size:20px">{{ MethodReturn }}</span>
       <hr />
     </div>
     <b-input-group prepend="path" v-show="isShowPath">
@@ -49,7 +49,7 @@ export default class Method extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Method";
-  StatusValue: string = "";
+  MethodReturn: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
   pathwithVar:string ="";
@@ -163,7 +163,7 @@ export default class Method extends Widget {
   async getData(url: string) {
     var apiLoad = url;
     await axios.get(apiLoad).then(response => {
-      this.StatusValue = response.data.ObjectVal;
+      this.MethodReturn = response.data.CFET2CORE_SAMPLE_VAL;
     });
   }
 

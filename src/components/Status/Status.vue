@@ -163,7 +163,9 @@ export default class Status extends Widget {
   async getData(url: string) {
     var apiLoad = url;
     await axios.get(apiLoad).then(response => {
-      this.StatusValue = response.data.ObjectVal;
+      console.log(response);
+      this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
+      console.log(this.StatusValue);
     });
   }
 
@@ -176,7 +178,8 @@ export default class Status extends Widget {
       this.userInputData,
       this.config.data.url
     );
-
+    console.log(this.StatusValue);
+    console.log(this.pathwithVar);
     await this.getData(this.pathwithVar);
   }
 }
