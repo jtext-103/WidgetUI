@@ -1,14 +1,4 @@
 <template>
-  <!-- <b-card class="Status">
-    <p>{{ config.data.url }}</p>
-    <button @click="showPathConfig">Setting</button>
-    <p>{{ StatusValue }}</p>
-    <div v-show="isShowPath">
-      <input v-model="config.data.url" />
-      <button @click="updateUI">OK</button>
-    </div>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams>
-  </b-card> -->
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
@@ -23,11 +13,14 @@
       <span style="float:left;font-size:20px">{{ StatusValue }}</span>
       <hr />
     </div>
-    <div v-show="isShowPath">
-      <input v-model="config.data.url" />
-      <button @click="updateUI">OK</button>
-    </div>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams>
+    <b-input-group prepend="path" v-show="isShowPath">
+      <b-form-input v-model="config.data.url"></b-form-input>
+      <b-input-group-append>
+        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+      </b-input-group-append>
+    </b-input-group>
+    <hr/>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams>
   </b-container>
 </template>
 
@@ -75,17 +68,15 @@ export default class Status extends Widget {
   }
 
   updateUI() {
+    this.isShowParams = true;
     var url = this.config.data.url;
     this.pathId = url.slice(0, url.indexOf("/"));
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
-    this.isShowParams = true;
-    this.isShowPath = false;
   }
 
   showPathConfig() {
-    this.isShowParams = !this.isShowParams;
     this.isShowPath = !this.isShowPath;
   }
 
@@ -105,13 +96,13 @@ export default class Status extends Widget {
     temp = this.strMapObjChange.objToStrMap(temp);
      console.log(temp);
     this.userInputData = temp;
-    console.log(this.userInputData);
+    console.log(this.userInputData);/*  */
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
   }
 
-  replaceStartPath(startPath:string)
+  replaceStartPath(startPath:string):void
   {
-
+    this.config.data.url.replace('$startPath$', startPath);
   }
 
   parentUpdate(payload: UpdatePayload): void {

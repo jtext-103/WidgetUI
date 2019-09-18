@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="col-md-1">
-      <button type="button" class="btn btn-primary btn-mid" @click="update">
+      <button type="button" class="btn btn-primary btn-mid" style="float:right" @click="update">
         <b>{{ action }}</b>
         <span class="glyphicon glyphicon-save"></span>
       </button>

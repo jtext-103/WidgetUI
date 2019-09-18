@@ -3,37 +3,47 @@
     <b-navbar class="Widget">
       <b-dropdown id="dropdown-1" text="Add Widget" class="m-md-2" variant="primary">
         <b-dropdown-item v-for="(availableWidget,index) in availableWidgets" :key="index">
-            <div v-on:click="addWidget(availableWidget)">{{availableWidget}}</div>
+          <div v-on:click="addWidget(availableWidget)">{{availableWidget}}</div>
         </b-dropdown-item>
       </b-dropdown>
       <b-button @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
-      <b-form-file  id="file" type="file" @change="loadTextFromFile" placeholder="Choose a widgetTemplate file to laod" accept=".json" style="width:30%;margin-left:2%" />
+      <b-button @click="UIGenerateAutomatic" style="margin-left:2%" variant="primary">test</b-button>
+      <b-form-file
+        id="file"
+        type="file"
+        @change="loadTextFromFile"
+        placeholder="Choose a widgetTemplate file to laod"
+        accept=".json"
+        style="width:30%;margin-left:2%"
+      />
     </b-navbar>
-    
 
     <grid-layout
-            :layout.sync="widgetList"
-            :col-num="12"
-            :row-height="30"
-            :is-draggable="true"
-            :is-resizable="true"
-            :is-mirrored="false"
-            :vertical-compact="true"
-            :margin="[10, 10]"
-            :use-css-transforms="true"
+      :layout.sync="widgetList"
+      :col-num="12"
+      :row-height="30"
+      :is-draggable="true"
+      :is-resizable="true"
+      :is-mirrored="false"
+      :vertical-compact="true"
+      :margin="[10, 10]"
+      :use-css-transforms="true"
     >
-       <grid-item v-for="(widget) in widgetList"
-                   :x="widget.x"
-                   :y="widget.y"
-                   :w="widget.w"
-                   :h="widget.h"
-                   :i="widget.i"
-                   :key="widget.i">
-            <div style="height:20px;background-color:rgb(0, 123, 255)"> </div>
-            <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
-        </grid-item>
+      <grid-item
+        v-for="(widget) in widgetList"
+        :x="widget.x"
+        :y="widget.y"
+        :w="widget.w"
+        :h="widget.h"
+        :i="widget.i"
+        :key="widget.i"
+      >
+        <div style="border-color: rgb(206, 212, 218);">
+          <div style="height:20px;background-color:rgb(0, 123, 255)"></div>
+          <component :is="widget.widgetComponentName" :ref="widget.ref"></component>
+        </div>
+      </grid-item>
     </grid-layout>
-
   </div>
 </template>
 
@@ -81,23 +91,50 @@ export default class App extends Vue {
     this.isShowAddWidget = !this.isShowAddWidget;
   }
 
-  async UIAutomaticGenerated() {
-    var fragment = window.location.hash;
-    if (fragment != "#") {
-      fragment = fragment.substring(1,fragment.length-1);
-      var customViewURL = "/customView" + fragment;
-      await axios.get(customViewURL).then(response => {
-        var widgets = Object.assign(
-        new AllWidgetConfig(),
-        JSON.parse(response.data.ObjectVal)
-      );
-       this.widgetList = widgets.widgetList;
-       this.lastWidgetIndex = Number(widgets.currentRef);
-       this.importActiveWidgetList();
 
-    });
-    }
+  UIGenerateAutomatic() {
+  // var fragment = window.location.hash;
+  var fragment = "#/card";
+  if (fragment != "#") {
+    fragment = fragment.substring(1,fragment.length);
+    var customViewURL = "customView/template" + fragment;
+    axios.get(customViewURL).then(response => {
+      if(response.data.CFET2CORE_SAMPLE_ISVALID == false || response.data.CFET2CORE_SAMPLE_VAL == null)
+      {
+        //直接访问对应的值
+        var dataURL = fragment;
+        axios.get(fragment).then(response => {
+          
+        }
+      }
+      else{
+        //返回有值的customview template，进行load处理
+          var customviewTemplate:string;
+          customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
+           console.log(customviewTemplate);
+
+          var widgets;
+          widgets = Object.assign(
+          new AllWidgetConfig(),
+          JSON.parse(customviewTemplate));
+          console.log(widgets);
+
+          this.widgetList = widgets.widgetList;
+          this.lastWidgetIndex = Number(widgets.currentRef);
+          this.$forceUpdate();
+
+          Vue.nextTick(() => { 
+          fragment = fragment.substring(1,fragment.length);
+          for (var wid of this.widgetList) {
+               ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
+           }                                      
+          this.importActiveWidgetList();
+      }); 
+
+      }
+    })    
   }
+}
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {
@@ -189,7 +226,7 @@ export default class App extends Vue {
   text-align: center;
   color: #2c3e50;
 }
-.Widget{
+.Widget {
   width: 100%;
   border-color: rgb(206, 212, 218);
 }

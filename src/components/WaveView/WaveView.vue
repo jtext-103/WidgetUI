@@ -66,6 +66,11 @@ export default class waveView extends Widget {
             }
         }
     } 
+    
+    replaceStartPath(startPath:string):void
+    {
+        this.config.data.url.replace('$startPath$', startPath);
+    }
 
     getConfig(): WidgetConfig {
         return this.config;

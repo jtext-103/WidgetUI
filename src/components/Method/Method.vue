@@ -1,14 +1,27 @@
 <template>
-  <div class="Method">
-    <p>{{ config.data.url }}</p>
-    <p>{{ MethodResponse }}</p>
-    <button @click="showPathConfig">Setting</button>
-    <div v-show="isShowPath">
-      <input v-model="config.data.url" />
-      <button @click="updateUI">OK</button>
+  <b-container class="bv-example-row">
+    <b-row style="margin-top:10px">
+      <b-col>
+        <span style="float:left;font-size:20px">path: {{ config.data.url }}</span>
+      </b-col>
+      <b-col>
+        <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
+      </b-col>
+      <hr />
+    </b-row>
+    <div style="width:100%">
+      <span style="float:left;font-size:20px">{{ StatusValue }}</span>
+      <hr />
     </div>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="invoke" :parentUserInputData="userInputData" @updataVariables="viewLoad"></WidgetParams>
-  </div>
+    <b-input-group prepend="path" v-show="isShowPath">
+      <b-form-input v-model="config.data.url"></b-form-input>
+      <b-input-group-append>
+        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+      </b-input-group-append>
+    </b-input-group>
+    <hr/>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="invoke"  @updataVariables="viewLoad" ></WidgetParams>
+  </b-container>
 </template>
 
 <script lang="ts">
@@ -35,7 +48,7 @@ export default class Method extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Method";
-  MethodResponse: string = "";
+  StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
   isShowPath: boolean = false;
@@ -48,7 +61,6 @@ export default class Method extends Widget {
       userInputData: ""
     }
   };
-  tempUrl: string = "";
 
   created() {
     // this.config.data.userInputData = this.userInputData;
@@ -56,17 +68,15 @@ export default class Method extends Widget {
   }
 
   updateUI() {
+    this.isShowParams = true;
     var url = this.config.data.url;
     this.pathId = url.slice(0, url.indexOf("/"));
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
-    this.isShowParams = true;
-    this.isShowPath = false;
   }
 
   showPathConfig() {
-    this.isShowParams = !this.isShowParams;
     this.isShowPath = !this.isShowPath;
   }
 
@@ -90,9 +100,15 @@ export default class Method extends Widget {
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
   }
 
+    replaceStartPath(startPath:string):void
+    {
+        this.config.data.url.replace('$startPath$', startPath);
+    }
+
   parentUpdate(payload: UpdatePayload): void {
     
   }
+
   refresh() {
     var Args: UpdatePayload = {
       action: "invoke",
@@ -106,7 +122,7 @@ export default class Method extends Widget {
   async getData(url: string) {
     var apiLoad = url;
     await axios.put(apiLoad).then(response => {
-      this.MethodResponse = response.data.ObjectVal;
+      this.StatusValue = response.data.ObjectVal;
     });
   }
 
@@ -130,4 +146,5 @@ export default class Method extends Widget {
   width: 100%;
   height: auto;
 }
+
 </style>
