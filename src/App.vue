@@ -58,12 +58,14 @@ import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
 import { Action, UpdatePayload } from "./models/UpdatePayload";
 import { Widget } from "./models/wiget";
+import { Actions } from "./models/customview";
 
 //when add more available widgets add ref to the widgets
 import Status from "./components/Status/Status.vue";
 import WaveView from "./components/WaveView/WaveView.vue";
 import Method from "./components/Method/Method.vue";
 import Config from "./components/Config/Config.vue";
+import Thing from "./components/Thing/Thing.vue";
 
 //this is the view selecotr class
 @Component({
@@ -73,6 +75,7 @@ import Config from "./components/Config/Config.vue";
     WaveView,
     Method,
     Config,
+    Thing,
     GridLayout,
     GridItem
   }
@@ -85,7 +88,7 @@ export default class App extends Vue {
   text: string = "";
 
   //when add more available widgets add its name here
-  availableWidgets = ["Status", "Config", "WaveView", "Method"];
+  availableWidgets = ["Status", "Config", "WaveView", "Method","Thing"];
 
   toggleShowAddWidget(): void {
     this.isShowAddWidget = !this.isShowAddWidget;
@@ -94,7 +97,7 @@ export default class App extends Vue {
 
   UIGenerateAutomatic() {
   // var fragment = window.location.hash;
-  var fragment = "#/card";
+  var fragment = "#/dataserver/DataByTimeFuzzy";
   if (fragment != "#") {
     fragment = fragment.substring(1,fragment.length);
     var customViewURL = "customView/template" + fragment;
@@ -104,8 +107,8 @@ export default class App extends Vue {
         //直接访问对应的值
         var dataURL = fragment;
         axios.get(fragment).then(response => {
-          
-        }
+          console.log(response.data.Actions);
+        })
       }
       else{
         //返回有值的customview template，进行load处理
