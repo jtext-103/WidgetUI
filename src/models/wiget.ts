@@ -1,6 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { WidgetConfig } from './WidgetConfig';
 import { UpdatePayload } from './UpdatePayload';
+import { ResourceInfo } from './Customview';
 
 export interface PokePath {
   getPath: string;
@@ -16,16 +17,9 @@ export abstract class Widget extends Vue {
   public abstract refresh(): void;
   public abstract updateUI(): void;
   public abstract replaceStartPath(startPath:string):void;
+  public  pathPoke(path:string):void{}
+  public  samplePoke(sample:ResourceInfo[],samplePath:string):void{}
 
-  public pathPoke()
-  {
-
-  }
-
-  public samplePoke()
-  {
-
-  }
 
 //   public poke(sample: object): PokePath
 //   {

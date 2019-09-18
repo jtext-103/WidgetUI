@@ -1,8 +1,4 @@
 export interface ResourceInfo {
-  Parameters: any;
-  OutputType: any;
+  Parameters: Map<string, string>;
+  OutputType: string;
 }
-
-export class Actions {
-    public action?:{[key: string]: ResourceInfo};
-  }

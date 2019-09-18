@@ -58,7 +58,7 @@ import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
 import { Action, UpdatePayload } from "./models/UpdatePayload";
 import { Widget } from "./models/wiget";
-import { Actions } from "./models/customview";
+import { ResourceInfo } from "./models/Customview";
 
 //when add more available widgets add ref to the widgets
 import Status from "./components/Status/Status.vue";
@@ -94,6 +94,14 @@ export default class App extends Vue {
     this.isShowAddWidget = !this.isShowAddWidget;
   }
 
+  pokeAndUpdateUI(ref:string, sample:ResourceInfo[], samplePath:string)
+  {
+    Vue.nextTick(() => {
+      console.log(this.$refs[ref]);
+      ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(sample,samplePath);
+      ((this.$refs[ref] as Array<Widget>)[0] as Widget).updateUI();
+    })
+  }
 
   UIGenerateAutomatic() {
   // var fragment = window.location.hash;
@@ -107,31 +115,68 @@ export default class App extends Vue {
         //直接访问对应的值
         var dataURL = fragment;
         axios.get(fragment).then(response => {
-          console.log(response.data.Actions);
+          var resourcetype = response.data.ResourceType;
+          var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
+          var sample: ResourceInfo[] = [];
+          //这里不知道要以什么类型接收json，所以写的比较死。后续displaytype加上后需要加上WaveView
+          switch(resourcetype){
+            case "Thing":
+              {
+                this.addWidget(resourcetype);
+                break;
+              }
+            case "Status":
+              {
+                this.addWidget(resourcetype);
+                var tempRef = (this.lastWidgetIndex - 1).toString();
+                sample[0] = response.data.Actions.get as ResourceInfo;
+                console.log(sample[0]);
+                console.log(sample[0].Parameters);
+                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                break;
+              }
+            case "Method":
+              {
+                this.addWidget(resourcetype);
+                var tempRef = (this.lastWidgetIndex - 1).toString();
+                sample[0] = response.data.Actions.invoke as ResourceInfo;
+                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                break;
+              }
+            case "Config":
+              {
+                this.addWidget(resourcetype);
+                var tempRef = (this.lastWidgetIndex - 1).toString();
+                //这里传的sample为数组是考虑到config，默认set位于sample[1]
+                sample[0] = response.data.Actions.get as ResourceInfo;
+                sample[1] = response.data.Actions.set as ResourceInfo;
+                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                break;
+              }
+          }
         })
       }
       else{
         //返回有值的customview template，进行load处理
           var customviewTemplate:string;
           customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
-           console.log(customviewTemplate);
-
-          var widgets;
-          widgets = Object.assign(
+          var widgets = Object.assign(
           new AllWidgetConfig(),
           JSON.parse(customviewTemplate));
-          console.log(widgets);
-
           this.widgetList = widgets.widgetList;
           this.lastWidgetIndex = Number(widgets.currentRef);
-          this.$forceUpdate();
-
+          this.$forceUpdate(); 
+          this.importActiveWidgetList();
+          //替换startpath
           Vue.nextTick(() => { 
           fragment = fragment.substring(1,fragment.length);
           for (var wid of this.widgetList) {
                ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
-           }                                      
-          this.importActiveWidgetList();
+           } 
+          //刷新值
+           for (var wid of this.widgetList) {
+               ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
+           } 
       }); 
 
       }
