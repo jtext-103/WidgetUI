@@ -53,6 +53,7 @@ export default class Method extends Widget {
   pathId: string = "";
   userInputData = new Map<string, string>();
   pathwithVar:string ="";
+  timer?:number;
   isShowPath: boolean = false;
   isShowParams: boolean = false;
 
@@ -67,6 +68,15 @@ export default class Method extends Widget {
   created() {
     // this.config.data.userInputData = this.userInputData;
     this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
+  }
+  mounted()
+  {
+    this.timer = setInterval(this.refresh,1000);
+  }
+
+  destroyed() 
+  {
+    clearInterval(this.timer);
   }
 
   updateUI() {

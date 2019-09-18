@@ -7,7 +7,6 @@
         </b-dropdown-item>
       </b-dropdown>
       <b-button @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
-      <b-button @click="UIGenerateAutomatic" style="margin-left:2%" variant="primary">test</b-button>
       <b-form-file
         id="file"
         type="file"
@@ -105,7 +104,7 @@ export default class App extends Vue {
     })
   }
 
-  UIGenerateAutomatic() {
+  mounted() {
   // var fragment = window.location.hash;
   var fragment = "#/dataserver/DataByTimeFuzzy";
   if (fragment != "#") {
@@ -183,8 +182,8 @@ export default class App extends Vue {
 
       }
     })    
+    }
   }
-}
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {
