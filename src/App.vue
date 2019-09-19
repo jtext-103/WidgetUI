@@ -106,10 +106,12 @@ export default class App extends Vue {
 
   mounted() {
   // var fragment = window.location.hash;
-  var fragment = "#/dataserver/DataByTimeFuzzy";
+   var fragment = "#/card0";
+  console.log(fragment);
   if (fragment != "#") {
     fragment = fragment.substring(1,fragment.length);
     var customViewURL = "customView/template" + fragment;
+    console.log(customViewURL);
     axios.get(customViewURL).then(response => {
       if(response.data.CFET2CORE_SAMPLE_ISVALID == false || response.data.CFET2CORE_SAMPLE_VAL == null)
       {
@@ -161,20 +163,22 @@ export default class App extends Vue {
         //返回有值的customview template，进行load处理
           var customviewTemplate:string;
           customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
+          console.log(customviewTemplate);
           var widgets = Object.assign(
           new AllWidgetConfig(),
           JSON.parse(customviewTemplate));
+          console.log(widgets);
           this.widgetList = widgets.widgetList;
           this.lastWidgetIndex = Number(widgets.currentRef);
           this.$forceUpdate(); 
-          this.importActiveWidgetList();
           //替换startpath
           Vue.nextTick(() => { 
-          fragment = fragment.substring(1,fragment.length);
-          for (var wid of this.widgetList) {
-               ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
-           } 
+          // fragment = fragment.substring(1,fragment.length);
+          // for (var wid of this.widgetList) {
+          //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
+          //  } 
           //刷新值
+          this.importActiveWidgetList();
            for (var wid of this.widgetList) {
                ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
            } 
@@ -198,6 +202,7 @@ export default class App extends Vue {
 
   importActiveWidgetList() {
     for (var wid of this.widgetList) {
+      console.log(wid.widgetConfig);
        ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).setConfig( wid.widgetConfig as WidgetConfig);
     }
   }

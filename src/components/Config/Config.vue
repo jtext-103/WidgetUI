@@ -3,16 +3,21 @@
     <b-row style="margin-top:10px">
       <b-col>
         <span style="float:left;font-size:20px">getPath: {{ config.data.get.url }}</span>
-        <span style="float:left;font-size:20px">setPath: {{ config.data.set.url }}</span>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
       </b-col>
       <hr />
     </b-row>
+    <b-row style="margin-top:10px">
+      <b-col>
+        <span style="float:left;font-size:20px">setPath: {{ config.data.set.url }}</span>
+      </b-col>
+    </b-row>
     <div style="width:100%">
       <span style="float:left;font-size:20px">getConfigValue:{{ getConfigValue }}</span>
-      <hr />
+      <div><hr v-show="isShowPath"/></div>
+      
       <!-- <span style="float:left;font-size:20px">setConfigValue:{{ setConfigValue }}</span>
       <hr /> -->
     </div>
@@ -23,17 +28,17 @@
         <b-button @click="updateGetUI" size="sm" text="Button" variant="primary">OK</b-button>
       </b-input-group-append>
     </b-input-group>
-    <hr/>
-    <WidgetParams ref="WidgetGetParams" v-show="isShowGetParams&&isShowPath" action="get"  @updataVariables="getViewLoad" ></WidgetParams>
-    <hr/>
+    <div><hr v-show="isShowGetParams&&isShowPath"/></div>
+    <WidgetParams ref="WidgetGetParams" v-show="isShowGetParams&&isShowPath" action="get"  @updataVariables="viewGetLoad" ></WidgetParams>
+    <div><hr v-show="isShowPath"/></div>
     <b-input-group prepend="setPath" v-show="isShowPath">
       <b-form-input v-model="config.data.set.url"></b-form-input>
       <b-input-group-append>
         <b-button @click="updateSetUI" size="sm" text="Button" variant="primary">OK</b-button>
       </b-input-group-append>
     </b-input-group>
-    <hr/>
-    <WidgetParams ref="WidgetSetParams" v-show="isShowSetParams&&isShowPath" action="set"  @updataVariables="setViewLoad" ></WidgetParams>
+    <div><hr v-show="isShowSetParams&&isShowPath"/></div>
+    <WidgetParams ref="WidgetSetParams" v-show="isShowSetParams&&isShowPath" action="set"  @updataVariables="viewSetLoad" ></WidgetParams>
   </b-container>
 </template>
 
@@ -90,15 +95,15 @@ export default class Config extends Widget {
     this.config.data.set.userInputData = this.strMapObjChange.strMapToObj(this.userSetInputData);
   }
 
-  mounted()
-  {
-    this.timer = setInterval(this.refresh,1000);
-  }
+  // mounted()
+  // {
+  //   this.timer = setInterval(this.refresh,1000);
+  // }
 
-  destroyed() 
-  {
-    clearInterval(this.timer);
-  }
+  // destroyed() 
+  // {
+  //   clearInterval(this.timer);
+  // }
 
   updateUI()
   {

@@ -1,15 +1,9 @@
 <template>
-    <div class="panel-heading">
-        <h2 class="panel-title">
-            <font>
-                Basic Path :&nbsp;
-            </font>
-            <font color="RoyalBlue" id="basePathId">{{ basePathId }}</font>
-            &nbsp;&nbsp;
-            <font id="sampleId">sample Rate: {{ sampleId }}</font>
-            &nbsp;&nbsp;
-            <font id="lengthId">length: {{ lengthId }}</font>
-        </h2>
+    <div class="largeFont" style="float:left width:100%">
+        <span>Basic Path :&nbsp;{{ basePathId }}</span><br>
+        <span> Rate: {{ sampleId }}</span><br>
+        <span>length: {{ lengthId }}</span><br>
+        <hr />
     </div>
 </template>
 

@@ -1,23 +1,17 @@
 <template id="setBasicParams">
   <div class="panel-body row">
-    <div v-show="isShowCog">
-      <div class="col-md-8">
-        <div class="input-group">
-          <span class="input-group-addon">Channel Path</span>
-          <input v-model="config.data.url" type="text" class="form-control" />
-        </div>
-      </div>
-      <div class="col-md-2">
-        <button type="button" class="btn btn-primary btn-mid" @click="getPathIdParams">
-          <b>&nbsp;ok&nbsp;</b>
-          <span class="glyphicon glyphicon-save"></span>
-        </button>
-      </div>
+    <div v-show="isShowCog" style="width:100%">
+      <b-input-group prepend="Channel Path">
+        <b-input v-model="config.data.url" ></b-input>
+        <b-input-group-addon>
+          <b-button variant="primary" @click="getPathIdParams">OK<span class="glyphicon glyphicon-save"></span></b-button>
+        </b-input-group-addon>
+      </b-input-group>
     </div>
     <WidgetParams ref="WidgetParams" v-show="isShowLoad" action="get" @updataVariables="viewLoad"></WidgetParams>
-    <button class="btn btn-primary btn-mid" style="float:right" @click="showPathIdConfig">
+    <b-button variant="primary" @click="showPathIdConfig" style="width:100%">
       <span class="glyphicon glyphicon-cog"></span>
-    </button>
+    </b-button>
   </div>
 </template>
 
@@ -32,6 +26,7 @@ import PathProcessor from "@/models/PathProcessor";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
+import StrMapObjChange from "@/models/StrMapObjChange";
 
 @Component({
     components:{
@@ -45,6 +40,7 @@ export default class setBasicParams extends Vue {
   isShowCog: boolean = false;
   pathId!: string;
   userInputData = new Map<string, string>();
+  strMapObjChange = new StrMapObjChange();
   config: WidgetConfig = {
     WidgetComponentName: "WaveView",
     data: {
@@ -67,7 +63,24 @@ export default class setBasicParams extends Vue {
     this.getConfig = this.config;
     this.updateConfig();
   }
-
+  refresh(){
+    var Args: UpdatePayload = {
+      action: "get",
+      variables: (this.$refs.WidgetParams as WidgetParams).getVariableValues(),
+      target: ["self"]
+    };
+    this.viewLoad(Args);
+  }
+  setConfig(config: WidgetConfig) {
+    (this.$refs.WidgetParams as WidgetParams).setVariableInput(config.data.userInputData);
+    this.config = config;
+    console.log(this.config);
+    this.refresh();
+  }
+  updateUserInputData(){
+    this.config.data.userInputData =this.strMapObjChange.strMapToObj((this.$refs.WidgetParams as WidgetParams).getVariableValues());
+    this.updateConfig();
+  }
   updateConfig() {
     this.getConfig = this.config;
     this.$emit("updateConfig", this.getConfig);
@@ -87,20 +100,24 @@ export default class setBasicParams extends Vue {
     this.isShowCog = false;
   }
   showPathIdConfig() {
-    this.isShowLoad = false;
-    this.isShowCog = true;
+    if(this.isShowCog || this.isShowLoad){
+      this.isShowCog = !this.isShowCog;
+      this.isShowLoad = !this.isShowLoad;
+    }else{
+      this.isShowCog = !this.isShowCog;
+    }
   }
-  async viewLoad(Args: any) {
+  async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
     this.getConfig.data.position.x2 = "";
     this.getConfig.data.position.y1 = "";
     this.getConfig.data.position.y2 = "";
-    console.log(Args);
-    this.config.data.userInputData = Args.Variables;
+    this.config.data.userInputData = Args.variables;
     var url = this.pathProcessor.FillPathWithVar(
       this.config.data.userInputData,
       this.config.data.url
     );
+    console.log(this.config);
     var path = this.pathId;
     this.$emit("getPathId", path);
     await this.getData(url);

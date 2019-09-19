@@ -1,0 +1,9 @@
+.smallFont{
+    font-size: 18px;
+}
+.largeFont{
+    font-size: 22px;
+}
+.largeFont span{
+    float: left;
+}
