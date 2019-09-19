@@ -83,7 +83,7 @@ import Thing from "./components/Thing/Thing.vue";
 })
 export default class App extends Vue {
   widgetList: WidgetRef[] = [];
-  fileName: string = "config.json";
+  fileName: string = "widgetTemplate.json";
   private lastWidgetIndex: number = 0;
   isShowAddWidget: Boolean = false;
   text: string = "";
@@ -105,8 +105,8 @@ export default class App extends Vue {
   }
 
   mounted() {
-  // var fragment = window.location.hash;
-   var fragment = "#/card0";
+  var fragment = window.location.hash;
+  //  var fragment = "#/card0";
   console.log(fragment);
   if (fragment != "#") {
     fragment = fragment.substring(1,fragment.length);

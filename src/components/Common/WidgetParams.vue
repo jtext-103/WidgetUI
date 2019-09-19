@@ -1,21 +1,21 @@
 <template>
-  <div style="margin-left: 0px">
-    <div v-for="(label, index) in userInputData.keys()" :key="index" class="col-md-3">
-      <div class="input-group">
-        <span class="input-group-addon">{{ label }}</span>
-        <input v-model="tempUserInputData[label]" type="text" class="form-control" />
-      </div>
+  <div style="width:100%">
+    <div v-for="(label, index) in userInputData.keys()" :key="index">
+      <b-input-group style="margin:5px">
+        <template v-slot:prepend>
+          <b-input-group-text class="smallFont">{{label}}</b-input-group-text>
+        </template>
+        <b-form-input class="smallFont" v-model="tempUserInputData[label]" ></b-form-input>
+      </b-input-group>
     </div>
-    <div class="col-md-1">
-      <button type="button" class="btn btn-primary btn-mid" @click="update">
+    <div style="width:auto;margin:5px">
+      <b-button variant="primary"  @click="update">
         <b>{{ action }}</b>
         <span class="glyphicon glyphicon-save"></span>
-      </button>
+      </b-button>
     </div>
   </div>
 </template>
-
-
 
 
 <script lang="ts">
@@ -61,7 +61,5 @@ export default class WidgetParams extends Vue{
         }
         this.$emit('updataVariables', Args)
     }
-
-
 }
 </script>
