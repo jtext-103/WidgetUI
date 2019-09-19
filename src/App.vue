@@ -248,7 +248,7 @@ export default class App extends Vue {
     var newWidget = new WidgetRef();
     newWidget.widgetComponentName = widgetName;
     newWidget.ref = this.lastWidgetIndex.toString();
-    newWidget.y=this.lastWidgetIndex*4;
+    newWidget.y=this.lastWidgetIndex*6;
     newWidget.i=Number(newWidget.ref);
     this.lastWidgetIndex++;
     this.widgetList = [...this.widgetList, newWidget];

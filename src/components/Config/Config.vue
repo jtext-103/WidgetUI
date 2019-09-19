@@ -2,7 +2,8 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;font-size:20px">path: {{ config.data.url }}</span>
+        <span style="float:left;font-size:20px">getPath: {{ config.data.get.url }}</span>
+        <span style="float:left;font-size:20px">setPath: {{ config.data.set.url }}</span>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
@@ -10,17 +11,29 @@
       <hr />
     </b-row>
     <div style="width:100%">
-      <span style="float:left;font-size:20px">{{ StatusValue }}</span>
+      <span style="float:left;font-size:20px">getConfigValue:{{ getConfigValue }}</span>
       <hr />
+      <!-- <span style="float:left;font-size:20px">setConfigValue:{{ setConfigValue }}</span>
+      <hr /> -->
     </div>
-    <b-input-group prepend="path" v-show="isShowPath">
-      <b-form-input v-model="config.data.url"></b-form-input>
+
+    <b-input-group prepend="getPath" v-show="isShowPath">
+      <b-form-input v-model="config.data.get.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateGetUI" size="sm" text="Button" variant="primary">OK</b-button>
       </b-input-group-append>
     </b-input-group>
     <hr/>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams>
+    <WidgetParams ref="WidgetGetParams" v-show="isShowGetParams&&isShowPath" action="get"  @updataVariables="getViewLoad" ></WidgetParams>
+    <hr/>
+    <b-input-group prepend="setPath" v-show="isShowPath">
+      <b-form-input v-model="config.data.set.url"></b-form-input>
+      <b-input-group-append>
+        <b-button @click="updateSetUI" size="sm" text="Button" variant="primary">OK</b-button>
+      </b-input-group-append>
+    </b-input-group>
+    <hr/>
+    <WidgetParams ref="WidgetSetParams" v-show="isShowSetParams&&isShowPath" action="set"  @updataVariables="setViewLoad" ></WidgetParams>
   </b-container>
 </template>
 
@@ -45,35 +58,68 @@ import { map } from "d3";
     WidgetParams
   }
 })
-export default class Status extends Widget {
+export default class Config extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
-  WidgetComponentName: string = "Status";
-  StatusValue: string = "";
+  WidgetComponentName: string = "Config";
+  getConfigValue: string = "";
+  setConfigValue: string = "";
   pathId: string = "";
-  userInputData = new Map<string, string>();
-  pathwithVar:string ="";
+  userGetInputData = new Map<string, string>();
+  userSetInputData = new Map<string, string>();
+  getPathwithVar:string ="";
+  setPathwithVar:string ="";
+  timer?:number;
   isShowPath: boolean = false;
-  isShowParams: boolean = false;
+  isShowGetParams: boolean = false;
+  isShowSetParams: boolean = false;
 
   config: WidgetConfig = {
     WidgetComponentName: "Status",
     data: {
-      url: "",
-      userInputData: ""
+      get:{url: "",
+      userInputData: ""},
+      set:{url: "",
+      userInputData: ""}
     }
   };
 
   created() {
     // this.config.data.userInputData = this.userInputData;
-    this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
+    this.config.data.get.userInputData = this.strMapObjChange.strMapToObj(this.userGetInputData);
+    this.config.data.set.userInputData = this.strMapObjChange.strMapToObj(this.userSetInputData);
   }
 
-  updateUI() {
-    this.isShowParams = true;
-    var url = this.config.data.url;
+  mounted()
+  {
+    this.timer = setInterval(this.refresh,1000);
+  }
+
+  destroyed() 
+  {
+    clearInterval(this.timer);
+  }
+
+  updateUI()
+  {
+    this.updateGetUI();
+    this.updateSetUI();
+  }
+
+  updateGetUI() {
+    this.isShowGetParams = true;
+    var url = this.config.data.get.url;
     this.pathId = url.slice(0, url.indexOf("/"));
-    (this.$refs.WidgetParams as WidgetParams).setVariableList(
+    (this.$refs.WidgetGetParams as WidgetParams).setVariableList(
+      this.pathProcessor.extractVarFromPath(url)
+    );
+  }
+
+  updateSetUI() {
+    this.isShowSetParams = true;
+    var url = this.config.data.set.url;
+    this.pathId = url.slice(0, url.indexOf("/"));
+    (this.$refs.WidgetSetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
   }
@@ -84,7 +130,8 @@ export default class Status extends Widget {
 
   getConfig(): WidgetConfig {
     // this.config.data.userInputData =(this.$refs.WidgetParams as WidgetParams).getVariableValues();
-    this.config.data.userInputData =this.strMapObjChange.strMapToObj((this.$refs.WidgetParams as WidgetParams).getVariableValues());
+    this.config.data.get.userInputData =this.strMapObjChange.strMapToObj((this.$refs.WidgetGetParams as WidgetParams).getVariableValues());
+    this.config.data.set.userInputData =this.strMapObjChange.strMapToObj((this.$refs.WidgetSetParams as WidgetParams).getVariableValues());
     return this.config;
   }
 
@@ -92,14 +139,24 @@ export default class Status extends Widget {
     this.config = widgetConfig;
     this.updateUI();
     //map不能序列化，必须要单独处理，这里的处理方法仅限map<string,string>类型
-    var temp = this.config.data.userInputData;
+    //布置get输入参数
+    var temp = this.config.data.get.userInputData;
     temp = JSON.parse(JSON.stringify(temp));
     console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
      console.log(temp);
-    this.userInputData = temp;
-    console.log(this.userInputData);/*  */
-    (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
+    this.userGetInputData = temp;
+    console.log(this.userGetInputData);/*  */
+    (this.$refs.WidgetGetParams as WidgetParams).setVariableInput(this.userGetInputData);
+    //布置set输入参数
+    temp = this.config.data.set.userInputData;
+    temp = JSON.parse(JSON.stringify(temp));
+    console.log(temp);
+    temp = this.strMapObjChange.objToStrMap(temp);
+     console.log(temp);
+    this.userSetInputData = temp;
+    console.log(this.userSetInputData);/*  */
+    (this.$refs.WidgetSetParams as WidgetParams).setVariableInput(this.userSetInputData);
   }
 
   samplePoke(sample:ResourceInfo[],samplePath:string)
@@ -108,13 +165,21 @@ export default class Status extends Widget {
     pokedPath = samplePath;
     var count:number = 0;
 
-    var temp = sample[0].Parameters;
-    temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
-    temp = this.strMapObjChange.objToStrMap(temp);
-     console.log(temp);
-    sample[0].Parameters = temp;
+    var getTemp = sample[0].Parameters;
+    getTemp = JSON.parse(JSON.stringify(getTemp));
+    console.log(getTemp);
+    getTemp = this.strMapObjChange.objToStrMap(getTemp);
+     console.log(getTemp);
+    sample[0].Parameters = getTemp;
     console.log(sample[0].Parameters);
+
+    var setTemp = sample[1].Parameters;
+    setTemp = JSON.parse(JSON.stringify(setTemp));
+    console.log(setTemp);
+    setTemp = this.strMapObjChange.objToStrMap(setTemp);
+     console.log(setTemp);
+    sample[1].Parameters = setTemp;
+    console.log(sample[1].Parameters);
 
     sample[0].Parameters.forEach((value , key) =>{
           count++;
@@ -127,7 +192,23 @@ export default class Status extends Widget {
     console.log(pokedPath);
     pokedPath = pokedPath.substring(0,pokedPath.length-1);
     console.log(pokedPath);
-    this.config.data.url = pokedPath;
+    this.config.data.get.url = pokedPath;
+
+    pokedPath = samplePath;
+    count = 0;
+
+    sample[1].Parameters.forEach((value , key) =>{
+          count++;
+          if(count == 1)
+          {
+              pokedPath = pokedPath + "?";
+          }
+           pokedPath = pokedPath + key + "=$" + key + "$&";
+    });
+    console.log(pokedPath);
+    pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    console.log(pokedPath);
+    this.config.data.set.url = pokedPath;
   }
 
   pathPoke()
@@ -143,7 +224,8 @@ export default class Status extends Widget {
 
   replaceStartPath(startPath:string):void
   {
-    this.config.data.url.replace('$startPath$', startPath);
+    this.config.data.get.url.replace('$startPath$', startPath);
+    this.config.data.set.url.replace('$startPath$', startPath);
   }
 
   parentUpdate(payload: UpdatePayload): void {
@@ -151,12 +233,19 @@ export default class Status extends Widget {
   }
 
   refresh() {
-    var Args: UpdatePayload = {
+    var GetArgs: UpdatePayload = {
       action: "get",
-      variables: (this.$refs.WidgetParams as WidgetParams).getVariableValues(),
+      variables: (this.$refs.WidgetGetParams as WidgetParams).getVariableValues(),
       target: ["self"]
     };
-    this.viewLoad(Args);
+    this.viewGetLoad(GetArgs);
+
+    var SetArgs: UpdatePayload = {
+      action: "set",
+      variables: (this.$refs.WidgetSetParams as WidgetParams).getVariableValues(),
+      target: ["self"]
+    };
+    this.viewSetLoad(SetArgs);
   }
 
 
@@ -164,23 +253,45 @@ export default class Status extends Widget {
     var apiLoad = url;
     await axios.get(apiLoad).then(response => {
       console.log(response);
-      this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
-      console.log(this.StatusValue);
+      this.getConfigValue = response.data.CFET2CORE_SAMPLE_VAL;
+      console.log(this.getConfigValue);
+    });
+  }
+
+  async setData(url: string) {
+    var apiLoad = url;
+    await axios.post(apiLoad).then(response => {
+      console.log(response);
+      this.setConfigValue = response.data.CFET2CORE_SAMPLE_VAL;
+      console.log(this.setConfigValue);
     });
   }
 
   //called when widgetParams action clicked
-  async viewLoad(Args: UpdatePayload) {
+  async viewGetLoad(Args: UpdatePayload) {
     // this.config.data.userInputData = Args.variables;
-    this.userInputData = Args.variables;
-    this.pathwithVar = this.pathProcessor.FillPathWithVar(
+    this.userGetInputData = Args.variables;
+    this.getPathwithVar = this.pathProcessor.FillPathWithVar(
       // this.config.data.userInputData,
-      this.userInputData,
-      this.config.data.url
+      this.userGetInputData,
+      this.config.data.get.url
     );
-    console.log(this.StatusValue);
-    console.log(this.pathwithVar);
-    await this.getData(this.pathwithVar);
+    console.log(this.getConfigValue);
+    console.log(this.getPathwithVar);
+    await this.getData(this.getPathwithVar);
+  }
+
+  async viewSetLoad(Args: UpdatePayload) {
+    // this.config.data.userInputData = Args.variables;
+    this.userSetInputData = Args.variables;
+    this.setPathwithVar = this.pathProcessor.FillPathWithVar(
+      // this.config.data.userInputData,
+      this.userSetInputData,
+      this.config.data.set.url
+    );
+    console.log(this.setConfigValue);
+    console.log(this.setPathwithVar);
+    await this.setData(this.setPathwithVar);
   }
 }
 </script>
