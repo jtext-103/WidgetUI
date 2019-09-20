@@ -225,13 +225,13 @@ export default class setBasicParams extends Vue {
     Plotly.newPlot(myPlot, data_update, data_layout, config);
   }
   async getData(url: string) {
-    var apiLoad = global_.thingPath + "/DataByTimeFuzzy/" + url;
+    var apiLoad = "/dataserver" + "/DataByTimeFuzzy/" + url;//改
     await axios.get(apiLoad).then(response => {
       this.temp.data = response.data.ObjectVal;
     });
   }
   async getDataTimeAxis(url: string) {
-    var apiLoad = global_.thingPath + "/DataByTimeFuzzyTimeAxis/" + url;
+    var apiLoad = "/dataerver" + "/DataByTimeFuzzyTimeAxis/" + url;
     await axios.get(apiLoad).then(response => {
       this.temp.dataTimeAxis = response.data.ObjectVal;
     });

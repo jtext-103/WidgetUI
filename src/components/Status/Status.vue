@@ -7,11 +7,11 @@
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
       </b-col>
-      <hr />
+      <div v-show="isShowPath"><hr /></div>
     </b-row>
     <div style="width:100%">
       <span style="float:left;font-size:20px">{{ StatusValue }}</span>
-      <hr />
+      <div v-show="isShowPath"><hr /></div>
     </div>
     <b-input-group prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
@@ -21,11 +21,13 @@
     </b-input-group>
     <hr/>
     <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams>
+    <FamilyLink ref="FamilyLink" :url="config.data.url"></FamilyLink>
   </b-container>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { VueSvgGauge } from 'vue-svg-gauge'
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { WidgetConfig } from "@/models/WidgetConfig";
@@ -39,10 +41,12 @@ import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
+import FamilyLink from '@/components/Common/FamilyLink.vue';
 
 @Component({
   components: {
-    WidgetParams
+    WidgetParams,
+    FamilyLink
   }
 })
 export default class Status extends Widget {
@@ -136,7 +140,10 @@ export default class Status extends Widget {
            pokedPath = pokedPath + key + "=$" + key + "$&";
     });
     console.log(pokedPath);
-    pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    if(count != 0 )
+    {
+        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    }
     console.log(pokedPath);
     this.config.data.url = pokedPath;
   }

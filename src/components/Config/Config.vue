@@ -7,7 +7,6 @@
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
       </b-col>
-      <hr />
     </b-row>
     <b-row style="margin-top:10px">
       <b-col>
@@ -16,8 +15,6 @@
     </b-row>
     <div style="width:100%">
       <span style="float:left;font-size:20px">getConfigValue:{{ getConfigValue }}</span>
-      <div><hr v-show="isShowPath"/></div>
-      
       <!-- <span style="float:left;font-size:20px">setConfigValue:{{ setConfigValue }}</span>
       <hr /> -->
     </div>

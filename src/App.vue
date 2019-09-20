@@ -106,7 +106,7 @@ export default class App extends Vue {
 
   mounted() {
   var fragment = window.location.hash;
-  //  var fragment = "#/card0";
+  // var fragment = "#/dataServer/BasePath";
   console.log(fragment);
   if (fragment != "#") {
     fragment = fragment.substring(1,fragment.length);

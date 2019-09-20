@@ -2,9 +2,7 @@
   <div style="width:100%">
     <div v-for="(label, index) in userInputData.keys()" :key="index">
       <b-input-group style="margin:5px">
-        <template v-slot:prepend>
-          <b-input-group-text class="smallFont">{{label}}</b-input-group-text>
-        </template>
+        <b-input-group-text class="smallFont">{{label}}</b-input-group-text>
         <b-form-input class="smallFont" v-model="tempUserInputData[label]" ></b-form-input>
       </b-input-group>
     </div>
@@ -36,6 +34,7 @@ export default class WidgetParams extends Vue{
         path.forEach(element => {
             this.userInputData.set(element, '');
         });
+        console.log(this.userInputData);
         this.$forceUpdate();
     }
 
