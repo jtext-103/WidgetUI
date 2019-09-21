@@ -41,7 +41,8 @@ export default class showViewInfo extends Vue {
         })
     }
     async getLength(pathId:string) {
-        var apiLoad = "dataserver" + '/length/' + pathId;
+        var apiLoad = "/dataserver" + '/length/' + pathId;
+        console.log(apiLoad);
         await axios.get(apiLoad)
         .then((response) => {
             this.lengthId = response.data.ObjectVal;

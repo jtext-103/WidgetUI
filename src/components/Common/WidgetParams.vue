@@ -6,8 +6,8 @@
         <b-form-input class="smallFont" v-model="tempUserInputData[label]" ></b-form-input>
       </b-input-group>
     </div>
-    <div style="width:auto;margin:5px">
-      <b-button variant="primary"  @click="update">
+    <div style="width:100%;margin:5px">
+      <b-button variant="primary"  @click="update" style="float:right">
         <b>{{ action }}</b>
         <span class="glyphicon glyphicon-save"></span>
       </b-button>

@@ -2,7 +2,7 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;font-size:20px">path: {{ config.data.url }}</span>
+        <span style="float:left;" class="largeFont">path: {{ pathwithVar }}</span>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
@@ -10,10 +10,10 @@
       <div v-show="isShowPath"><hr /></div>
     </b-row>
     <div style="width:100%">
-      <span style="float:left;font-size:20px">{{ StatusValue }}</span>
+      <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
       <div v-show="isShowPath"><hr /></div>
     </div>
-    <b-input-group prepend="path" v-show="isShowPath">
+    <b-input-group class="smallFont" prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
         <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
@@ -21,7 +21,7 @@
       </b-input-group-append>
     </b-input-group>
     <hr/>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams><br>
     <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
   </b-container>
 </template>
@@ -151,8 +151,11 @@ export default class Status extends Widget {
 
   pathPoke()
   {
-      axios.get(this.config.data.url).then(response => {
-        console.log(this.config.data.url);
+      var f = this.config.data.url; 
+      var pokepath = "a";
+      pokepath = f;
+      axios.get(pokepath).then(response => {
+        console.log(pokepath);
         console.log(response);
         console.log(response.data);
         var resourcetype = response.data.ResourceType;
@@ -161,6 +164,7 @@ export default class Status extends Widget {
         var sample: ResourceInfo[] = [];
         sample[0] = response.data.Actions.get as ResourceInfo;
         this.samplePoke(sample,samplePath);
+        this.updateUI();
       })
   }
 

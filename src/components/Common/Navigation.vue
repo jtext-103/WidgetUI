@@ -1,13 +1,13 @@
 <template id="setBasicParams">
 <div>
-    <span>parent and children link</span>
-    <b-button variant="primary" @click="getPath">show</b-button>  
-    <div style="margin-top:10px;height:80px;overflow:scroll" v-show="isShow">
-        <a :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
-        <div v-for="(path,index) in childrenPath" :key="index">
-            <a :href= "path" style="float:left">childrenPath:{{path}}</a><br>
-        </div>
-    </div>
+    <b-dropdown id="dropdown-1" text="Navigation" variant="primary">
+        <b-dropdown-item v-show="isShowParentPath">
+            <a class="smallFont" :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
+        </b-dropdown-item>
+        <b-dropdown-item v-for="path in childrenPath" :key="path">
+          <a class="smallFont" :href= "path" style="float:left">childrenPath:{{path}}</a><br>
+        </b-dropdown-item>
+    </b-dropdown>  
 </div>
 </template>
 
@@ -33,16 +33,23 @@ export default class Navigation extends Vue {
     @Prop() url!:string;
     parentPath!:string;
     childrenPath!:string[];
-    isShow:boolean = false;
+    isShowParentPath:boolean = false;
 
+    @Watch("url")
+    onUrlChanged(){
+        this.getPath();
+    }
     async getPath(){
+        this.isShowParentPath = false;
         var apiLoad = this.url;
         await axios.get(apiLoad)
         .then(response => {
             this.parentPath = response.data.ParentPath as string;
             this.childrenPath = response.data.ChildrenPath as string[];
         })
-        this.isShow = true;
+        if(this.parentPath != ''){
+            this.isShowParentPath = true;
+        }
         this.$forceUpdate();
     }
 

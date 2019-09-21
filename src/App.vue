@@ -112,10 +112,10 @@ export default class App extends Vue {
   mounted() {
     // var f1 = window.location.hash;
     // console.log(typeof(f1));
-    var fragment = window.location.hash;
-    fragment += "a";
-    fragment = fragment.substring(0,fragment.length-1);
-    console.log(typeof(fragment));
+    var f = window.location.hash; 
+    var fragment = "a";
+    fragment = f;
+    console.log(fragment);
     if (fragment != "#") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
