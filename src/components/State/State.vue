@@ -49,10 +49,10 @@ import Navigation from '@/components/Common/Navigation.vue';
     Navigation
   }
 })
-export default class Status extends Widget {
+export default class State extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
-  WidgetComponentName: string = "Status";
+  WidgetComponentName: string = "State";
   StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
@@ -62,7 +62,7 @@ export default class Status extends Widget {
   isShowParams: boolean = false;
 
   config: WidgetConfig = {
-    WidgetComponentName: "Status",
+    WidgetComponentName: "State",
     data: {
       url: "",
       userInputData: ""
@@ -182,6 +182,25 @@ export default class Status extends Widget {
     await axios.get(apiLoad).then(response => {
       console.log(response);
       this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
+      switch(this.StatusValue.toString())
+      {
+          case "0":{
+              this.StatusValue ="Idle"
+              break;
+          }
+          case "1":{
+              this.StatusValue ="Ready"
+              break;
+          }
+          case "2":{
+              this.StatusValue ="Running"
+              break;
+          }
+          case "255":{
+              this.StatusValue ="Error"
+              break;
+          }
+      }
       console.log(this.StatusValue);
     });
   }

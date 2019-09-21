@@ -108,21 +108,20 @@ export default class Method extends Widget {
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
   }
 
-  samplePoke(sample:ResourceInfo[],samplePath:string)
+ samplePoke(sample:any)
   {
+    var samplePath = sample.CFET2CORE_SAMPLE_PATH;
     var pokedPath:string;
     pokedPath = samplePath;
     var count:number = 0;
 
-    var temp = sample[0].Parameters;
+    var temp = sample.Actions.invoke.Parameters;
     temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-     console.log(temp);
-    sample[0].Parameters = temp;
-    console.log(sample[0].Parameters);
+    var Parameters:Map<string, string>;
+    Parameters = temp;
 
-    sample[0].Parameters.forEach((value , key) =>{
+    Parameters.forEach((value , key) =>{
           count++;
           if(count == 1)
           {
@@ -130,12 +129,11 @@ export default class Method extends Widget {
           }
            pokedPath = pokedPath + key + "=$" + key + "$&";
     });
-    console.log(pokedPath);
+
     if(count != 0 )
     {
         pokedPath = pokedPath.substring(0,pokedPath.length-1);
     }
-    console.log(pokedPath);
     this.config.data.url = pokedPath;
   }
 
@@ -145,18 +143,13 @@ export default class Method extends Widget {
       var pokepath = "a";
       pokepath = f;
       axios.get(pokepath).then(response => {
-        console.log(pokepath);
-        console.log(response);
-        console.log(response.data);
         var resourcetype = response.data.ResourceType;
         console.log(resourcetype);
-        var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
-        var sample: ResourceInfo[] = [];
-        sample[0] = response.data.Actions.get as ResourceInfo;
-        this.samplePoke(sample,samplePath);
+        this.samplePoke(response.data);
         this.updateUI();
       })
   }
+
 
   replaceStartPath(startPath:string):void
   {

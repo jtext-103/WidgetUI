@@ -87,21 +87,20 @@ export default class waveView extends Widget {
     updateConfig(data:WidgetConfig){
         this.config = data;
     }
-    samplePoke(sample:ResourceInfo[],samplePath:string)
-    {
+      samplePoke(sample:any)
+  {
+    var samplePath = sample.CFET2CORE_SAMPLE_PATH;
     var pokedPath:string;
     pokedPath = samplePath;
     var count:number = 0;
 
-    var temp = sample[0].Parameters;
+    var temp = sample.Actions.get.Parameters;
     temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-     console.log(temp);
-    sample[0].Parameters = temp;
-    console.log(sample[0].Parameters);
+    var Parameters:Map<string, string>;
+    Parameters = temp;
 
-    sample[0].Parameters.forEach((value , key) =>{
+    Parameters.forEach((value , key) =>{
           count++;
           if(count == 1)
           {
@@ -109,19 +108,22 @@ export default class waveView extends Widget {
           }
            pokedPath = pokedPath + key + "=$" + key + "$&";
     });
-    console.log(pokedPath);
-    pokedPath = pokedPath.substring(0,pokedPath.length-1);
-    console.log(pokedPath);
+
+    if(count != 0 )
+    {
+        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    }
     this.config.data.url = pokedPath;
   }
+
   pathPoke()
   {
-        axios.get(this.config.data.url).then(response => {
-        var resourcetype = response.data.ResourceType;
-        var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
-        var sample: ResourceInfo[] = [];
-        sample[0] = response.data.Actions.get as ResourceInfo;
-        this.samplePoke(sample,samplePath);
+      var f = this.config.data.url; 
+      var pokepath = "a";
+      pokepath = f;
+      axios.get(pokepath).then(response => {
+        this.samplePoke(response.data);
+        this.updateUI();
       })
   }
 }

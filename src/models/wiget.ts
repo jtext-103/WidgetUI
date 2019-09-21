@@ -17,8 +17,8 @@ export abstract class Widget extends Vue {
   public abstract refresh(): void;
   public abstract updateUI(): void;
   public abstract replaceStartPath(startPath:string):void;
-  public pathPoke(path:string):void{}
-  public samplePoke(sample:ResourceInfo[],samplePath:string):void{}
+  public abstract pathPoke():void;
+  public abstract samplePoke(sample:any):void;
 
 
 //   public poke(sample: object): PokePath

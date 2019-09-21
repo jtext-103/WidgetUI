@@ -104,6 +104,7 @@ export default class Config extends Widget {
   isShowSetParams: boolean = false;
 
   isSetPoke: boolean = false;
+  isGetPoke: boolean = false;
 
   config: WidgetConfig = {
     WidgetComponentName: "Status",
@@ -198,79 +199,91 @@ export default class Config extends Widget {
     );
   }
 
-  samplePoke(sample: ResourceInfo[], samplePath: string) {
+  samplePoke(sample:any){
+    var samplePath = sample.CFET2CORE_SAMPLE_PATH;
     var pokedPath: string;
     pokedPath = samplePath;
     var count: number = 0;
-    console.log(this.isSetPoke);
-    if (this.isSetPoke == false) {
-      var getTemp = sample[0].Parameters;
-      getTemp = JSON.parse(JSON.stringify(getTemp));
-      getTemp = this.strMapObjChange.objToStrMap(getTemp);
-      sample[0].Parameters = getTemp;
 
-      sample[0].Parameters.forEach((value, key) => {
-        count++;
-        if (count == 1) {
-          pokedPath = pokedPath + "?";
-        }
-        pokedPath = pokedPath + key + "=$" + key + "$&";
+
+    if (this.isSetPoke == false || this.isGetPoke == true) {
+      var temp = sample.Actions.get.Parameters;
+      temp = JSON.parse(JSON.stringify(temp));
+      temp = this.strMapObjChange.objToStrMap(temp);
+      var Parameters:Map<string, string>;
+      Parameters = temp;
+      console.log(Parameters);
+
+      Parameters.forEach((value , key) =>{
+            count++;
+            if(count == 1)
+            {
+                pokedPath = pokedPath + "?";
+            }
+            pokedPath = pokedPath + key + "=$" + key + "$&";
       });
-      pokedPath = pokedPath.substring(0, pokedPath.length - 1);
+
+      if(count != 0 )
+      {
+          pokedPath = pokedPath.substring(0,pokedPath.length-1);
+      }
       this.config.data.get.url = pokedPath;
     } 
     
-    if (sample.length == 2) {
+    if (this.isGetPoke == false || this.isSetPoke == true) {
       pokedPath = samplePath;
       count = 0;
 
-      var setTemp = sample[1].Parameters;
-      setTemp = JSON.parse(JSON.stringify(setTemp));
-      setTemp = this.strMapObjChange.objToStrMap(setTemp);
-      sample[1].Parameters = setTemp;
+      var settemp = sample.Actions.set.Parameters;
+      console.log(settemp);
+      settemp = JSON.parse(JSON.stringify(settemp));
+      settemp = this.strMapObjChange.objToStrMap(settemp);
+      var SetParameters:Map<string, string>;
+      SetParameters = settemp;
+      console.log(SetParameters);
 
-      sample[1].Parameters.forEach((value, key) => {
-        count++;
-        if (count == 1) {
-          pokedPath = pokedPath + "?";
-        }
-        pokedPath = pokedPath + key + "=$" + key + "$&";
+      SetParameters.forEach((value , key) =>{
+            count++;
+            if(count == 1)
+            {
+                pokedPath = pokedPath + "?";
+            }
+            pokedPath = pokedPath + key + "=$" + key + "$&";
       });
-      pokedPath = pokedPath.substring(0, pokedPath.length - 1);
+
+      if(count != 0 )
+      {
+          pokedPath = pokedPath.substring(0,pokedPath.length-1);
+      }
       this.config.data.set.url = pokedPath;
     }
     this.isSetPoke = false;
+    this.isGetPoke = false;
   }
 
-  getPathPoke() {
-    var f = this.config.data.get.url;
-    var pokepath = "a";
-    pokepath = f;
-    axios.get(pokepath).then(response => {
-      var resourcetype = response.data.ResourceType;
-      var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
-      var sample: ResourceInfo[] = [];
-      sample[0] = response.data.Actions.get as ResourceInfo;
-      this.samplePoke(sample, samplePath);
-      this.updateUI();
-    });
+  getPathPoke()
+  {
+      var f = this.config.data.get.url; 
+      var pokepath = "a";
+      pokepath = f;
+      axios.get(pokepath).then(response => {
+        this.isGetPoke = true;
+        this.samplePoke(response.data);
+        this.updateUI();
+      })
   }
 
-  setPathPoke() {
-    var f = this.config.data.set.url;
-    var pokepath = "a";
-    pokepath = f;
-    axios.get(pokepath).then(response => {
-      console.log(response.data);
-      var resourcetype = response.data.ResourceType;
-      var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
-      var sample: ResourceInfo[] = [];
-      sample[0] = response.data.Actions.get as ResourceInfo;
-      sample[1] = response.data.Actions.set as ResourceInfo;
-      this.isSetPoke = true;
-      this.samplePoke(sample, samplePath);
-      this.updateUI();
-    });
+
+  setPathPoke()
+  {
+      var f = this.config.data.set.url; 
+      var pokepath = "a";
+      pokepath = f;
+      axios.get(pokepath).then(response => {
+        this.isSetPoke = true;
+        this.samplePoke(response.data);
+        this.updateUI();
+      })
   }
 
   pathPoke() {

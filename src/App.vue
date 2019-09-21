@@ -61,6 +61,7 @@ import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
 import { Action, UpdatePayload } from "./models/UpdatePayload";
 import { Widget } from "./models/wiget";
 import { ResourceInfo } from "./models/Customview";
+import { indexOf } from 'typescript-collections/dist/lib/arrays';
 
 //when add more available widgets add ref to the widgets
 import Status from "./components/Status/Status.vue";
@@ -68,7 +69,8 @@ import WaveView from "./components/WaveView/WaveView.vue";
 import Method from "./components/Method/Method.vue";
 import Config from "./components/Config/Config.vue";
 import Thing from "./components/Thing/Thing.vue";
-import { indexOf } from 'typescript-collections/dist/lib/arrays';
+import State from "./components/State/State.vue";
+// import Gauge from "./components/Gauge/Gauge.vue";
 
 Vue.use(VueRouter)
 //this is the view selecotr class
@@ -81,7 +83,8 @@ Vue.use(VueRouter)
     Config,
     Thing,
     GridLayout,
-    GridItem
+    GridItem,
+    State
   }
 })
 export default class App extends Vue {
@@ -92,18 +95,17 @@ export default class App extends Vue {
   text: string = "";
 
   //when add more available widgets add its name here
-  availableWidgets = ["Status", "Config", "WaveView", "Method", "Thing"];
+  availableWidgets = ["Status", "Config", "WaveView", "Method", "Thing","State"];
 
   toggleShowAddWidget(): void {
     this.isShowAddWidget = !this.isShowAddWidget;
   }
 
-  pokeAndUpdateUI(ref: string, sample: ResourceInfo[], samplePath: string) {
+  pokeAndUpdateUI(ref: string, sample: any) {
     Vue.nextTick(() => {
       console.log(this.$refs[ref]);
       ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(
-        sample,
-        samplePath
+        sample
       );
       ((this.$refs[ref] as Array<Widget>)[0] as Widget).updateUI();
     });
@@ -134,38 +136,11 @@ export default class App extends Vue {
             console.log(dataresponse.data);
             var resourcetype = dataresponse.data.ResourceType;
             var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
-            var sample: ResourceInfo[] = [];
-            //这里不知道要以什么类型接收json，所以写的比较死。后续displaytype加上后需要加上WaveView
-            switch (resourcetype) {
-              case "Thing": {
-                this.addWidget(resourcetype.data);
-                break;
-              }
-              case "Status": {
-                this.addWidget(resourcetype);
-                var tempRef = (this.lastWidgetIndex - 1).toString();
-                sample[0] = dataresponse.data.Actions.get as ResourceInfo;
-                console.log(sample[0]);
-                console.log(sample[0].Parameters);
-                this.pokeAndUpdateUI(tempRef, sample, samplePath);
-                break;
-              }
-              case "Method": {
-                this.addWidget(resourcetype);
-                var tempRef = (this.lastWidgetIndex - 1).toString();
-                sample[0] = dataresponse.data.Actions.invoke as ResourceInfo;
-                this.pokeAndUpdateUI(tempRef, sample, samplePath);
-                break;
-              }
-              case "Config": {
-                this.addWidget(resourcetype);
-                var tempRef = (this.lastWidgetIndex - 1).toString();
-                //这里传的sample为数组是考虑到config，默认set位于sample[1]
-                sample[0] = dataresponse.data.Actions.get as ResourceInfo;
-                sample[1] = dataresponse.data.Actions.set as ResourceInfo;
-                this.pokeAndUpdateUI(tempRef, sample, samplePath);
-                break;
-              }
+            this.addWidget(resourcetype);
+            if(resourcetype != "Thing")
+            {
+              var tempRef = (this.lastWidgetIndex - 1).toString();
+              this.pokeAndUpdateUI(tempRef, dataresponse.data);
             }
           });
         } else {
