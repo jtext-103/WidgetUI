@@ -17,11 +17,12 @@
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
         <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>
     <hr/>
     <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams>
-    <FamilyLink ref="FamilyLink" :url="config.data.url"></FamilyLink>
+    <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
   </b-container>
 </template>
 
@@ -41,12 +42,12 @@ import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
-import FamilyLink from '@/components/Common/FamilyLink.vue';
+import Navigation from '@/components/Common/Navigation.vue';
 
 @Component({
   components: {
     WidgetParams,
-    FamilyLink
+    Navigation
   }
 })
 export default class Status extends Widget {
@@ -151,7 +152,11 @@ export default class Status extends Widget {
   pathPoke()
   {
       axios.get(this.config.data.url).then(response => {
+        console.log(this.config.data.url);
+        console.log(response);
+        console.log(response.data);
         var resourcetype = response.data.ResourceType;
+        console.log(resourcetype);
         var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
         var sample: ResourceInfo[] = [];
         sample[0] = response.data.Actions.get as ResourceInfo;

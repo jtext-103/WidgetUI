@@ -5,6 +5,7 @@
         <b-input v-model="config.data.url" ></b-input>
         <b-input-group-addon>
           <b-button variant="primary" @click="getPathIdParams">OK<span class="glyphicon glyphicon-save"></span></b-button>
+          <!-- <b-button variant="info" @click="">poke</b-button> -->
         </b-input-group-addon>
       </b-input-group>
     </div>
@@ -222,7 +223,7 @@ export default class setBasicParams extends Vue {
       displaylogo: false
     };
 
-    Plotly.newPlot(myPlot, data_update, data_layout, config);
+    // Plotly.newPlot(myPlot, data_update, data_layout, config);
   }
   async getData(url: string) {
     var apiLoad = "/dataserver" + "/DataByTimeFuzzy/" + url;//改

@@ -2,10 +2,10 @@
 <div>
     <span>parent and children link</span>
     <b-button variant="primary" @click="getPath">show</b-button>  
-    <div>
-        <a :href="parentPath">{{ parentPath }}</a>
+    <div style="margin-top:10px;height:80px;overflow:scroll" v-show="isShow">
+        <a :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
         <div v-for="(path,index) in childrenPath" :key="index">
-            <a :href= "path" >{{path}}</a><br>
+            <a :href= "path" style="float:left">childrenPath:{{path}}</a><br>
         </div>
     </div>
 </div>
@@ -29,10 +29,11 @@ import WidgetParams from "@/components/Common/WidgetParams.vue";
         WidgetParams
     }
 })
-export default class FamilyLink extends Vue {
+export default class Navigation extends Vue {
     @Prop() url!:string;
     parentPath!:string;
     childrenPath!:string[];
+    isShow:boolean = false;
 
     async getPath(){
         var apiLoad = this.url;
@@ -41,6 +42,7 @@ export default class FamilyLink extends Vue {
             this.parentPath = response.data.ParentPath as string;
             this.childrenPath = response.data.ChildrenPath as string[];
         })
+        this.isShow = true;
         this.$forceUpdate();
     }
 

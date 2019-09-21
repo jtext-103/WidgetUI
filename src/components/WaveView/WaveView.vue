@@ -5,6 +5,7 @@
     
     </div>
     <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config'></setBasicParams>
+    <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
 </div>
 </template>
 
@@ -12,6 +13,7 @@
 import Vue from 'vue'
 import setBasicParams from './setBasicParams.vue';
 import showViewInfo from './showViewInfo.vue';
+import Navigation from '@/components/Common/Navigation.vue';
 import Component from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { WidgetConfig } from '@/models/WidgetConfig';
@@ -25,7 +27,8 @@ import axios from "axios";
 @Component({
     components:{
         setBasicParams,
-        showViewInfo
+        showViewInfo,
+        Navigation
     }
 })
 export default class waveView extends Widget {

@@ -41,7 +41,7 @@
       >
         <div style="border-color: rgb(206, 212, 218);">
           <div class="vue-draggable-handle" style="height:20px;background-color:rgb(0, 123, 255)"></div>
-          <component  class="no-drag" :is="widget.widgetComponentName" :ref="widget.ref"></component>
+          <component class="no-drag" :is="widget.widgetComponentName" :ref="widget.ref"></component>
         </div>
       </grid-item>
     </grid-layout>
@@ -53,7 +53,8 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import axios from "axios";
-import {  GridItemData,GridLayout,GridItem} from 'vue-grid-layout';
+import { GridItemData, GridLayout, GridItem } from "vue-grid-layout";
+import VueRouter from 'vue-router';
 
 import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
@@ -67,7 +68,9 @@ import WaveView from "./components/WaveView/WaveView.vue";
 import Method from "./components/Method/Method.vue";
 import Config from "./components/Config/Config.vue";
 import Thing from "./components/Thing/Thing.vue";
+import { indexOf } from 'typescript-collections/dist/lib/arrays';
 
+Vue.use(VueRouter)
 //this is the view selecotr class
 @Component({
   components: {
@@ -89,109 +92,117 @@ export default class App extends Vue {
   text: string = "";
 
   //when add more available widgets add its name here
-  availableWidgets = ["Status", "Config", "WaveView", "Method","Thing"];
+  availableWidgets = ["Status", "Config", "WaveView", "Method", "Thing"];
 
   toggleShowAddWidget(): void {
     this.isShowAddWidget = !this.isShowAddWidget;
   }
 
-  pokeAndUpdateUI(ref:string, sample:ResourceInfo[], samplePath:string)
-  {
+  pokeAndUpdateUI(ref: string, sample: ResourceInfo[], samplePath: string) {
     Vue.nextTick(() => {
       console.log(this.$refs[ref]);
-      ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(sample,samplePath);
+      ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(
+        sample,
+        samplePath
+      );
       ((this.$refs[ref] as Array<Widget>)[0] as Widget).updateUI();
-    })
+    });
   }
 
   mounted() {
-  var fragment = window.location.hash;
-  // var fragment = "#/dataServer/BasePath";
-  console.log(fragment);
-  if (fragment != "#") {
-    fragment = fragment.substring(1,fragment.length);
-    var customViewURL = "customView/template" + fragment;
-    console.log(customViewURL);
-    axios.get(customViewURL).then(response => {
-      if(response.data.CFET2CORE_SAMPLE_ISVALID == false || response.data.CFET2CORE_SAMPLE_VAL == null)
-      {
-        //直接访问对应的值
-        var dataURL = fragment;
-        axios.get(fragment).then(response => {
-          var resourcetype = response.data.ResourceType;
-          var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
-          var sample: ResourceInfo[] = [];
-          //这里不知道要以什么类型接收json，所以写的比较死。后续displaytype加上后需要加上WaveView
-          switch(resourcetype){
-            case "Thing":
-              {
-                this.addWidget(resourcetype);
+    // var f1 = window.location.hash;
+    // console.log(typeof(f1));
+    var fragment = window.location.hash;
+    fragment += "a";
+    fragment = fragment.substring(0,fragment.length-1);
+    console.log(typeof(fragment));
+    if (fragment != "#") {
+      fragment = fragment.substring(1, fragment.length);
+      var customViewURL = "/customView/template" + fragment;
+      console.log(customViewURL);
+      axios.get(customViewURL).then(response => {
+        if (
+          response.data.CFET2CORE_SAMPLE_ISVALID == false ||
+          response.data.CFET2CORE_SAMPLE_VAL == null
+        ) {
+          //直接访问对应的值
+          var dataURL = fragment;
+          console.log(dataURL);
+          axios.get(dataURL,{headers: {
+              "Content-Type":"application/json"
+            }}).then(dataresponse => {
+            console.log(dataresponse.data);
+            var resourcetype = dataresponse.data.ResourceType;
+            var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
+            var sample: ResourceInfo[] = [];
+            //这里不知道要以什么类型接收json，所以写的比较死。后续displaytype加上后需要加上WaveView
+            switch (resourcetype) {
+              case "Thing": {
+                this.addWidget(resourcetype.data);
                 break;
               }
-            case "Status":
-              {
+              case "Status": {
                 this.addWidget(resourcetype);
                 var tempRef = (this.lastWidgetIndex - 1).toString();
-                sample[0] = response.data.Actions.get as ResourceInfo;
+                sample[0] = dataresponse.data.Actions.get as ResourceInfo;
                 console.log(sample[0]);
                 console.log(sample[0].Parameters);
-                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                this.pokeAndUpdateUI(tempRef, sample, samplePath);
                 break;
               }
-            case "Method":
-              {
+              case "Method": {
                 this.addWidget(resourcetype);
                 var tempRef = (this.lastWidgetIndex - 1).toString();
-                sample[0] = response.data.Actions.invoke as ResourceInfo;
-                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                sample[0] = dataresponse.data.Actions.invoke as ResourceInfo;
+                this.pokeAndUpdateUI(tempRef, sample, samplePath);
                 break;
               }
-            case "Config":
-              {
+              case "Config": {
                 this.addWidget(resourcetype);
                 var tempRef = (this.lastWidgetIndex - 1).toString();
                 //这里传的sample为数组是考虑到config，默认set位于sample[1]
-                sample[0] = response.data.Actions.get as ResourceInfo;
-                sample[1] = response.data.Actions.set as ResourceInfo;
-                this.pokeAndUpdateUI(tempRef, sample,samplePath);
+                sample[0] = dataresponse.data.Actions.get as ResourceInfo;
+                sample[1] = dataresponse.data.Actions.set as ResourceInfo;
+                this.pokeAndUpdateUI(tempRef, sample, samplePath);
                 break;
               }
-          }
-        })
-      }
-      else{
-        //返回有值的customview template，进行load处理
-          var customviewTemplate:string;
+            }
+          });
+        } else {
+          //返回有值的customview template，进行load处理
+          var customviewTemplate: string;
           customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
           console.log(customviewTemplate);
           var widgets = Object.assign(
-          new AllWidgetConfig(),
-          JSON.parse(customviewTemplate));
+            new AllWidgetConfig(),
+            JSON.parse(customviewTemplate)
+          );
           console.log(widgets);
           this.widgetList = widgets.widgetList;
           this.lastWidgetIndex = Number(widgets.currentRef);
-          this.$forceUpdate(); 
+          this.$forceUpdate();
           //替换startpath
-          Vue.nextTick(() => { 
-          // fragment = fragment.substring(1,fragment.length);
-          // for (var wid of this.widgetList) {
-          //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
-          //  } 
-          //刷新值
-          this.importActiveWidgetList();
-           for (var wid of this.widgetList) {
-               ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
-           } 
-      }); 
-
-      }
-    })    
+          Vue.nextTick(() => {
+            // fragment = fragment.substring(1,fragment.length);
+            // for (var wid of this.widgetList) {
+            //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
+            //  }
+            //刷新值
+            this.importActiveWidgetList();
+            for (var wid of this.widgetList) {
+              ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
+            }
+          });
+        }
+      });
     }
   }
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {
-      widget.widgetConfig = ((this.$refs[widget.ref] as Array<Widget>)[0] as Widget).getConfig();
+      widget.widgetConfig = ((this.$refs[widget.ref] as Array<
+        Widget
+      >)[0] as Widget).getConfig();
     }
     var widgetConfigList = new AllWidgetConfig();
     widgetConfigList.widgetList = this.widgetList;
@@ -203,10 +214,11 @@ export default class App extends Vue {
   importActiveWidgetList() {
     for (var wid of this.widgetList) {
       console.log(wid.widgetConfig);
-       ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).setConfig( wid.widgetConfig as WidgetConfig);
+      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).setConfig(
+        wid.widgetConfig as WidgetConfig
+      );
     }
   }
-
 
   loadTextFromFile(ev: any) {
     const file = ev.target.files[0];
@@ -223,13 +235,13 @@ export default class App extends Vue {
       this.widgetList = widgets.widgetList;
       this.lastWidgetIndex = Number(widgets.currentRef);
       this.$forceUpdate();
-      Vue.nextTick(() => {                                         // changed here
+      Vue.nextTick(() => {
+        // changed here
         this.importActiveWidgetList();
-      });  
+      });
       // console.log(this.$refs);
     };
-    
-}
+  }
 
   saveWidgetList(): void {
     var data = JSON.stringify(this.exportActiveWidgetList());
@@ -253,8 +265,8 @@ export default class App extends Vue {
     var newWidget = new WidgetRef();
     newWidget.widgetComponentName = widgetName;
     newWidget.ref = this.lastWidgetIndex.toString();
-    newWidget.y=this.lastWidgetIndex*6;
-    newWidget.i=Number(newWidget.ref);
+    newWidget.y = this.lastWidgetIndex * 6;
+    newWidget.i = Number(newWidget.ref);
     this.lastWidgetIndex++;
     this.widgetList = [...this.widgetList, newWidget];
   }
