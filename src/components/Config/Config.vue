@@ -23,10 +23,10 @@
     <div v-show="isShowGetPath">
       <hr />
     </div>
-    <b-input-group class="smallFont" prepend="getPath" v-show="isShowGetPath">
+    <b-input-group size="lg" prepend="getPath" v-show="isShowGetPath">
       <b-form-input v-model="config.data.get.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateGetUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateGetUI" text="Button" variant="primary">OK</b-button>
         <b-button variant="info" @click="getPathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>
@@ -43,10 +43,10 @@
     <div>
       <hr v-show="isShowSetPath" />
     </div>
-    <b-input-group class="smallFont" prepend="setPath" v-show="isShowSetPath">
+    <b-input-group size="lg" prepend="setPath" v-show="isShowSetPath">
       <b-form-input v-model="config.data.set.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateSetUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateSetUI" text="Button" variant="primary">OK</b-button>
         <b-button variant="info" @click="setPathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>

@@ -1,13 +1,14 @@
 <template id="setBasicParams">
 <div>
-    <b-dropdown id="dropdown-1" text="Navigation" variant="primary">
-        <b-dropdown-item v-show="isShowParentPath">
-            <a class="smallFont" :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
-        </b-dropdown-item>
-        <b-dropdown-item v-for="path in childrenPath" :key="path">
-          <a class="smallFont" :href= "path" style="float:left">childrenPath:{{path}}</a><br>
-        </b-dropdown-item>
-    </b-dropdown>  
+    <br>
+    <b-button variant="primary" class="smallFont" @click="showNavigation" style="float:right">Navigation</b-button>
+    <br>
+    <div v-show="isShowNavigation&&isShowParentPath">
+        <a class="smallFont" :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
+    </div>
+    <div v-show="isShowNavigation" v-for="(path, index) in childrenPath" :key="index">
+        <a class="smallFont" :href= "path" style="float:left">childrenPath:{{path}}</a><br>
+    </div>
 </div>
 </template>
 
@@ -34,6 +35,7 @@ export default class Navigation extends Vue {
     parentPath!:string;
     childrenPath!:string[];
     isShowParentPath:boolean = false;
+    isShowNavigation:boolean = false;
 
     @Watch("url")
     onUrlChanged(){
@@ -51,6 +53,11 @@ export default class Navigation extends Vue {
             this.isShowParentPath = true;
         }
         this.$forceUpdate();
+    }
+    
+    showNavigation()
+    {
+        this.isShowNavigation = !this.isShowNavigation;
     }
 
 }

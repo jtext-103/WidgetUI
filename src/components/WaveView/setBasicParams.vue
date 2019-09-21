@@ -1,18 +1,15 @@
-<template id="setBasicParams">
-  <div class="panel-body row">
+<template>
+  <div>
     <div v-show="isShowCog" style="width:100%">
-      <b-input-group prepend="Channel Path">
+      <b-input-group size="lg" prepend="Channel Path">
         <b-input v-model="config.data.url" ></b-input>
         <b-input-group-addon>
           <b-button variant="primary" @click="getPathIdParams">OK<span class="glyphicon glyphicon-save"></span></b-button>
-          <!-- <b-button variant="info" @click="">poke</b-button> -->
+          <b-button variant="info" @click="pathPoke">poke</b-button>
         </b-input-group-addon>
       </b-input-group>
     </div>
     <WidgetParams ref="WidgetParams" v-show="isShowLoad" action="get" @updataVariables="viewLoad"></WidgetParams>
-    <b-button variant="primary" @click="showPathIdConfig" style="width:100%">
-      <span class="glyphicon glyphicon-cog"></span>
-    </b-button>
   </div>
 </template>
 
@@ -24,7 +21,7 @@ import global_ from '@/components/Common/global.vue';
 import { WidgetConfig } from "@/models/WidgetConfig";
 import { UpdatePayload } from "@/models/UpdatePayload";
 import PathProcessor from "@/models/PathProcessor";
-import { forEach } from "typescript-collections/dist/lib/arrays";
+import { forEach, indexOf } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import StrMapObjChange from "@/models/StrMapObjChange";
@@ -72,6 +69,9 @@ export default class setBasicParams extends Vue {
     };
     this.viewLoad(Args);
   }
+  pathPoke(){
+    this.$emit("pathPoke");
+  }
   setConfig(config: WidgetConfig) {
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(config.data.userInputData);
     this.config = config;
@@ -93,7 +93,6 @@ export default class setBasicParams extends Vue {
     }
     this.updateConfig();
     var url = this.config.data.url;
-    this.pathId = url.slice(0, url.indexOf("/"));
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
@@ -118,11 +117,23 @@ export default class setBasicParams extends Vue {
       this.config.data.userInputData,
       this.config.data.url
     );
-    console.log(this.config);
+    var first = url.indexOf("/");
+    var second = url.indexOf("/", first+1);
+    var third = url.indexOf("/", second+1)
+    this.pathId = url.slice(second+1, third);
+    var thingPath = url.slice(0, url.indexOf('/', 2))
     var path = this.pathId;
-    this.$emit("getPathId", path);
-    await this.getData(url);
-    await this.getDataTimeAxis(url);
+    var dealPath = {
+      thingPath:thingPath,
+      path:path
+    }
+    var dealFillPath = {
+      url:url.slice(url.indexOf('/', 1)+1),
+      thingPath:thingPath
+    }
+    this.$emit("getPathId", dealPath);
+    await this.getData(dealFillPath);
+    await this.getDataTimeAxis(dealFillPath);
     var myPlot = this.wave;
     var data_initial = [
       {
@@ -223,18 +234,19 @@ export default class setBasicParams extends Vue {
       displaylogo: false
     };
 
-    // Plotly.newPlot(myPlot, data_update, data_layout, config);
+    Plotly.newPlot(myPlot, data_update, data_layout, config);
   }
-  async getData(url: string) {
-    var apiLoad = "/dataserver" + "/DataByTimeFuzzy/" + url;//改
+  async getData(url: any) {
+    var apiLoad = url.thingPath + "/DataByTimeFuzzy/" + url.url;
+    console.log(apiLoad);//改
     await axios.get(apiLoad).then(response => {
-      this.temp.data = response.data.ObjectVal;
+      this.temp.data = response.data.CFET2CORE_SAMPLE_VAL;
     });
   }
-  async getDataTimeAxis(url: string) {
-    var apiLoad = "/dataerver" + "/DataByTimeFuzzyTimeAxis/" + url;
+  async getDataTimeAxis(url: any) {
+    var apiLoad = url.thingPath + "/DataByTimeFuzzyTimeAxis/" + url.url;
     await axios.get(apiLoad).then(response => {
-      this.temp.dataTimeAxis = response.data.ObjectVal;
+      this.temp.dataTimeAxis = response.data.CFET2CORE_SAMPLE_VAL;
     });
   }
 }

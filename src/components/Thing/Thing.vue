@@ -39,6 +39,10 @@ export default class Thing extends Widget {
     this.config.data.url.replace('$startPath$', startPath);
   }
 
+  samplePoke(sample:any){}
+
+  pathPoke(){}
+
   parentUpdate(payload: UpdatePayload): void {
     
   }

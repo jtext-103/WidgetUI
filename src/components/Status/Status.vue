@@ -13,10 +13,10 @@
       <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
       <div v-show="isShowPath"><hr /></div>
     </div>
-    <b-input-group class="smallFont" prepend="path" v-show="isShowPath">
+    <b-input-group size="lg" prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
         <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>
@@ -74,15 +74,15 @@ export default class Status extends Widget {
     this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
   }
 
-  mounted()
-  {
-    this.timer = setInterval(this.refresh,1000);
-  }
+  // mounted()
+  // {
+  //   this.timer = setInterval(this.refresh,1000);
+  // }
 
-  destroyed() 
-  {
-    clearInterval(this.timer);
-  }
+  // destroyed() 
+  // {
+  //   clearInterval(this.timer);
+  // }
 
   updateUI() {
     this.isShowPath = false;

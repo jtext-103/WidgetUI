@@ -13,10 +13,10 @@
       <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
       <div v-show="isShowPath"><hr /></div>
     </div>
-    <b-input-group class="smallFont" prepend="path" v-show="isShowPath">
+    <b-input-group size="lg"  prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
         <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>

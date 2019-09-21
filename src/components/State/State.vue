@@ -7,16 +7,15 @@
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
       </b-col>
-      <div v-show="isShowPath"><hr /></div>
+      <div v-show="isShowPath"></div>
     </b-row>
-    <div style="width:100%">
-      <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
-      <div v-show="isShowPath"><hr /></div>
+    <div style="width:100%;border-style: solid; border-width: 1px;">
+      <p style="float:left;" class="largeFont">{{ StatusValue }}</p>
     </div>
-    <b-input-group class="smallFont" prepend="path" v-show="isShowPath">
+    <b-input-group size="lg" prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
-        <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
         <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>

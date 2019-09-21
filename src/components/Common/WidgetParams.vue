@@ -1,9 +1,9 @@
 <template>
   <div style="width:100%">
     <div v-for="(label, index) in userInputData.keys()" :key="index">
-      <b-input-group style="margin:5px">
-        <b-input-group-text class="smallFont">{{label}}</b-input-group-text>
-        <b-form-input class="smallFont" v-model="tempUserInputData[label]" ></b-form-input>
+      <b-input-group size="lg" style="margin:5px">
+        <b-input-group-text>{{label}}</b-input-group-text>
+        <b-form-input v-model="tempUserInputData[label]" ></b-form-input>
       </b-input-group>
     </div>
     <div style="width:100%;margin:5px">

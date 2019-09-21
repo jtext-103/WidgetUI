@@ -1,11 +1,11 @@
 <template>
 <div class="waveView">
-    <showViewInfo :pathId="pathId"></showViewInfo>
+    <showViewInfo ref="showViewInfo" :pathId="pathId" @showPathIdConfig="showPathIdConfig"></showViewInfo>
     <div ref="wave">
     
     </div>
-    <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config'></setBasicParams>
-    <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
+    <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config' @pathPoke="pathPoke"></setBasicParams>
+    <Navigation ref="FamilyLink" :url="config.data.url" style="margin-top:30px"></Navigation>
 </div>
 </template>
 
@@ -72,6 +72,9 @@ export default class waveView extends Widget {
     parentUpdate(payload: UpdatePayload): void {
 
     }
+    showPathIdConfig(){
+        (this.$refs.setBasicParams as setBasicParams).showPathIdConfig();
+    }
     refresh() {
         (this.$refs.setBasicParams as setBasicParams).refresh();
     }
@@ -87,44 +90,43 @@ export default class waveView extends Widget {
     updateConfig(data:WidgetConfig){
         this.config = data;
     }
-      samplePoke(sample:any)
-  {
-    var samplePath = sample.CFET2CORE_SAMPLE_PATH;
-    var pokedPath:string;
-    pokedPath = samplePath;
-    var count:number = 0;
+    samplePoke(sample:any)
+    {
+        var samplePath = sample.CFET2CORE_SAMPLE_PATH;
+        var pokedPath:string;
+        pokedPath = samplePath;
+        var count:number = 0;
 
-    var temp = sample.Actions.get.Parameters;
-    temp = JSON.parse(JSON.stringify(temp));
-    temp = this.strMapObjChange.objToStrMap(temp);
-    var Parameters:Map<string, string>;
-    Parameters = temp;
+        var temp = sample.Actions.get.Parameters;
+        temp = JSON.parse(JSON.stringify(temp));
+        console.log(temp);
+        temp = this.strMapObjChange.objToStrMap(temp);
+        console.log(temp);
+        var Parameters:Map<string, string>;
+        Parameters = temp;
 
-    Parameters.forEach((value , key) =>{
-          count++;
-          if(count == 1)
-          {
-              pokedPath = pokedPath + "?";
-          }
-           pokedPath = pokedPath + key + "=$" + key + "$&";
+        Parameters.forEach((value , key) =>{
+            count++;
+            if(count == 1)
+            {
+                pokedPath = pokedPath + "?";
+            }
+            pokedPath = pokedPath + key + "=$" + key + "$&";
     });
-
     if(count != 0 )
     {
         pokedPath = pokedPath.substring(0,pokedPath.length-1);
     }
     this.config.data.url = pokedPath;
   }
-
   pathPoke()
   {
-      var f = this.config.data.url; 
-      var pokepath = "a";
-      pokepath = f;
-      axios.get(pokepath).then(response => {
+    var f = this.config.data.url; 
+    var pokepath = "a";
+    pokepath = f;
+    axios.get(this.config.data.url).then(response => {
         this.samplePoke(response.data);
-        this.updateUI();
-      })
+    })
   }
 }
 </script>
