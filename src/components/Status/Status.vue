@@ -21,7 +21,7 @@
       </b-input-group-append>
     </b-input-group>
     <hr/>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="get"  @updataVariables="viewLoad" ></WidgetParams><br>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams><br>
     <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
   </b-container>
 </template>
@@ -37,7 +37,6 @@ import { Widget } from "@/models/wiget";
 import { ResourceInfo } from "@/models/Customview";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import axios from "axios";
-import Plotly from "plotly.js";
 import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
@@ -70,15 +69,15 @@ export default class Status extends Widget {
     }
   };
 
-  // created() {
-  //   // this.config.data.userInputData = this.userInputData;
-  //   this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
-  // }
+  created() {
+    // this.config.data.userInputData = this.userInputData;
+    this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
+  }
 
-  // mounted()
-  // {
-  //   this.timer = setInterval(this.refresh,1000);
-  // }
+  mounted()
+  {
+    this.timer = setInterval(this.refresh,1000);
+  }
 
   destroyed() 
   {
@@ -86,6 +85,7 @@ export default class Status extends Widget {
   }
 
   updateUI() {
+    this.isShowPath = false;
     this.isShowParams = true;
     var url = this.config.data.url;
     this.pathId = url.slice(0, url.indexOf("/"));

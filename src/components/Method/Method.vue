@@ -2,30 +2,33 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;font-size:20px">path: {{ config.data.url }}</span>
+        <span style="float:left;" class="largeFont">path: {{ pathwithVar }}</span>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
       </b-col>
-      <hr />
+      <div v-show="isShowPath"><hr /></div>
     </b-row>
     <div style="width:100%">
-      <span style="float:left;font-size:20px">{{ MethodReturn }}</span>
-      <hr />
+      <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
+      <div v-show="isShowPath"><hr /></div>
     </div>
-    <b-input-group prepend="path" v-show="isShowPath">
+    <b-input-group class="smallFont" prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>
         <b-button @click="updateUI" size="sm" text="Button" variant="primary">OK</b-button>
+        <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group-append>
     </b-input-group>
     <hr/>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams&&isShowPath" action="invoke"  @updataVariables="viewLoad" ></WidgetParams>
+    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="invoke"  @updataVariables="viewLoad" ></WidgetParams><br>
+    <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
   </b-container>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import { VueSvgGauge } from 'vue-svg-gauge'
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { WidgetConfig } from "@/models/WidgetConfig";
@@ -34,26 +37,26 @@ import { Widget } from "@/models/wiget";
 import { ResourceInfo } from "@/models/Customview";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import axios from "axios";
-import Plotly from "plotly.js";
 import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
+import Navigation from '@/components/Common/Navigation.vue';
 
 @Component({
   components: {
-    WidgetParams
+    WidgetParams,
+    Navigation
   }
 })
 export default class Method extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Method";
-  MethodReturn: string = "";
+  StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
   pathwithVar:string ="";
-  timer?:number;
   isShowPath: boolean = false;
   isShowParams: boolean = false;
 
@@ -65,21 +68,14 @@ export default class Method extends Widget {
     }
   };
 
-  // created() {
-  //   // this.config.data.userInputData = this.userInputData;
-  //   this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
-  // }
-  // mounted()
-  // {
-  //   this.timer = setInterval(this.refresh,1000);
-  // }
-
-  destroyed() 
-  {
-    clearInterval(this.timer);
+  created() {
+    // this.config.data.userInputData = this.userInputData;
+    this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
   }
 
+
   updateUI() {
+    this.isShowPath = false;
     this.isShowParams = true;
     var url = this.config.data.url;
     this.pathId = url.slice(0, url.indexOf("/"));
@@ -135,19 +131,30 @@ export default class Method extends Widget {
            pokedPath = pokedPath + key + "=$" + key + "$&";
     });
     console.log(pokedPath);
-    pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    if(count != 0 )
+    {
+        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    }
     console.log(pokedPath);
     this.config.data.url = pokedPath;
   }
 
   pathPoke()
   {
-      axios.put(this.config.data.url).then(response => {
+      var f = this.config.data.url; 
+      var pokepath = "a";
+      pokepath = f;
+      axios.get(pokepath).then(response => {
+        console.log(pokepath);
+        console.log(response);
+        console.log(response.data);
         var resourcetype = response.data.ResourceType;
+        console.log(resourcetype);
         var samplePath = response.data.CFET2CORE_SAMPLE_PATH;
         var sample: ResourceInfo[] = [];
         sample[0] = response.data.Actions.get as ResourceInfo;
         this.samplePoke(sample,samplePath);
+        this.updateUI();
       })
   }
 
@@ -172,8 +179,10 @@ export default class Method extends Widget {
 
   async getData(url: string) {
     var apiLoad = url;
-    await axios.get(apiLoad).then(response => {
-      this.MethodReturn = response.data.CFET2CORE_SAMPLE_VAL;
+    await axios.put(apiLoad).then(response => {
+      console.log(response);
+      this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
+      console.log(this.StatusValue);
     });
   }
 
@@ -186,7 +195,8 @@ export default class Method extends Widget {
       this.userInputData,
       this.config.data.url
     );
-
+    console.log(this.StatusValue);
+    console.log(this.pathwithVar);
     await this.getData(this.pathwithVar);
   }
 }

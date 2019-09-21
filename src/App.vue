@@ -116,7 +116,7 @@ export default class App extends Vue {
     var fragment = "a";
     fragment = f;
     console.log(fragment);
-    if (fragment != "#") {
+    if (fragment != "#/") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
       console.log(customViewURL);
