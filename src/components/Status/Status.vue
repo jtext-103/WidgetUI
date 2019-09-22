@@ -9,10 +9,10 @@
       </b-col>
       <div v-show="isShowPath"><hr /></div>
     </b-row>
-    <div style="width:100%">
+     <div style="width:100%;overflow:auto">
       <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
-      <div v-show="isShowPath"><hr /></div>
     </div>
+    <div v-show="isShowPath"><hr /></div>
     <b-input-group size="lg" prepend="path" v-show="isShowPath">
       <b-form-input v-model="config.data.url"></b-form-input>
       <b-input-group-append>

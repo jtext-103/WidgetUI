@@ -1,12 +1,12 @@
 <template>
   <div id="app">
     <b-navbar class="Widget">
-      <b-dropdown id="dropdown-1" text="Add Widget" class="m-md-2" variant="primary">
-        <b-dropdown-item v-for="(availableWidget,index) in availableWidgets" :key="index">
+      <b-dropdown id="dropdown-1" text="Add Widget" class="m-md-2" variant="primary" size="lg">
+        <b-dropdown-item v-for="(availableWidget,index) in availableWidgets" :key="index" class="smallFont">
           <div v-on:click="addWidget(availableWidget)">{{availableWidget}}</div>
         </b-dropdown-item>
       </b-dropdown>
-      <b-button @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
+      <b-button class="smallFont" @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
       <b-form-file
         id="file"
         type="file"
@@ -14,6 +14,7 @@
         placeholder="Choose a widgetTemplate file to laod"
         accept=".json"
         style="width:30%;margin-left:2%"
+        class="smallFont"
       />
     </b-navbar>
 

@@ -6,6 +6,7 @@
         <b-button variant="primary" style="float:right">
             <span class="glyphicon glyphicon-cog" @click="showPathIdConfig"></span>
         </b-button>
+        <br>
         <hr />
     </div>
 </template>
