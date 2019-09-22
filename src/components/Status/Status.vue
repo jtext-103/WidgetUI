@@ -74,15 +74,15 @@ export default class Status extends Widget {
     this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
   }
 
-  // mounted()
-  // {
-  //   this.timer = setInterval(this.refresh,1000);
-  // }
+  mounted()
+  {
+    this.timer = setInterval(this.refresh,1000);
+  }
 
-  // destroyed() 
-  // {
-  //   clearInterval(this.timer);
-  // }
+  destroyed() 
+  {
+    clearInterval(this.timer);
+  }
 
   updateUI() {
     this.isShowPath = false;

@@ -72,7 +72,6 @@ import Thing from "./components/Thing/Thing.vue";
 import State from "./components/State/State.vue";
 // import Gauge from "./components/Gauge/Gauge.vue";
 
-Vue.use(VueRouter)
 //this is the view selecotr class
 @Component({
   components: {

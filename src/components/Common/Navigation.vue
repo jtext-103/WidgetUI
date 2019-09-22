@@ -1,17 +1,18 @@
-<template id="setBasicParams">
+<template id="Navigation">
 <div>
     <br>
     <b-button variant="primary" class="smallFont" @click="showNavigation" style="float:right">Navigation</b-button>
     <br>
-    <div v-show="isShowNavigation&&isShowParentPath">
-        <a class="smallFont" :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a>
+    <div v-show="isShowNavigation&&isShowParentPath" style="width:100%;height:25px">
+        <b-link :href="parentPath" class="smallFont" style="float:left">parentPath:{{ parentPath }}</b-link>
+        <!-- <a class="smallFont" :href="parentPath" style="float:left">parentPath:{{ parentPath }}</a> -->
     </div>
-    <div v-show="isShowNavigation" v-for="(path, index) in childrenPath" :key="index">
-        <a class="smallFont" :href= "path" style="float:left">childrenPath:{{path}}</a><br>
+    <div v-show="isShowNavigation" v-for="(path, index) in childrenPath" :key="index" style="width:100%;height:25px">
+        <b-link :href="path" class="smallFont" style="float:left">childrenPath:{{path}}</b-link>
+        <!-- <a class="smallFont" :href= "path" style="float:left">childrenPath:{{path}}</a> -->
     </div>
 </div>
 </template>
-
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
