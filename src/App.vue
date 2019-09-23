@@ -164,9 +164,9 @@ export default class App extends Vue {
             //  }
             //刷新值
             this.importActiveWidgetList();
-            for (var wid of this.widgetList) {
-              ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
-            }
+            // for (var wid of this.widgetList) {
+            //   ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
+            // }
           });
         }
       });
