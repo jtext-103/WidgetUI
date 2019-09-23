@@ -2,34 +2,66 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="largeFont">path: {{ pathwithVar }}</span>
+        <span style="float:left;" class="smallFont">path: {{ config.data.url }}</span>
       </b-col>
       <b-col>
-        <b-button @click="showPathConfig" variant="primary" style="float:right"><span class="glyphicon glyphicon-cog"></span></b-button>
+        <b-button @click="showPathConfig" variant="primary" style="float:right">
+          <span class="glyphicon glyphicon-cog"></span>
+        </b-button>
       </b-col>
-      <div v-show="isShowPath"><hr /></div>
     </b-row>
-     <div style="width:100%;overflow:auto">
-      <span style="float:left;" class="largeFont">{{ StatusValue }}</span>
-    </div>
-    <div v-show="isShowPath"><hr /></div>
-    <b-input-group size="lg" prepend="path" v-show="isShowPath">
-      <b-form-input v-model="config.data.url"></b-form-input>
-      <b-input-group-append>
-        <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
-        <b-button variant="info" @click="pathPoke">poke</b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <hr/>
-    <WidgetParams ref="WidgetParams" v-show="isShowParams" action="get"  @updataVariables="viewLoad" ></WidgetParams><br>
-    <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
+
+    <br />
+
+    <b-row>
+      <b-col>
+        <div
+          v-if="StatusValue!=''&&StatusValue!=undefined"
+          style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
+        >
+          <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
+        </div>
+      </b-col>
+    </b-row>
+
+    <br />
+
+    <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="path" v-show="isShowPath">
+          <b-form-input v-model="config.data.url"></b-form-input>
+          <b-input-group-append>
+            <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
+            <b-button variant="info" @click="pathPoke">poke</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row>
+      <b-col>
+        <WidgetParams
+          ref="WidgetParams"
+          v-show="isShowParams"
+          action="get"
+          @updataVariables="viewLoad"
+        ></WidgetParams>
+      </b-col>
+    </b-row>
+
+    <br />
+    <b-row>
+      <b-col>
+        <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
 
 <script lang="ts">
 import Vue from "vue";
-import { VueSvgGauge } from 'vue-svg-gauge'
+import { VueSvgGauge } from "vue-svg-gauge";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { WidgetConfig } from "@/models/WidgetConfig";
@@ -42,7 +74,7 @@ import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
-import Navigation from '@/components/Common/Navigation.vue';
+import Navigation from "@/components/Common/Navigation.vue";
 
 @Component({
   components: {
@@ -57,8 +89,8 @@ export default class State extends Widget {
   StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
-  pathwithVar:string ="";
-  timer?:number;
+  pathwithVar: string = "";
+  timer?: number;
   isShowPath: boolean = false;
   isShowParams: boolean = false;
 
@@ -72,16 +104,16 @@ export default class State extends Widget {
 
   created() {
     // this.config.data.userInputData = this.userInputData;
-    this.config.data.userInputData = this.strMapObjChange.strMapToObj(this.userInputData);
+    this.config.data.userInputData = this.strMapObjChange.strMapToObj(
+      this.userInputData
+    );
   }
 
-  mounted()
-  {
-    this.timer = setInterval(this.refresh,1000);
+  mounted() {
+    this.timer = setInterval(this.refresh, 1000);
   }
 
-  destroyed() 
-  {
+  destroyed() {
     clearInterval(this.timer);
   }
 
@@ -101,7 +133,9 @@ export default class State extends Widget {
 
   getConfig(): WidgetConfig {
     // this.config.data.userInputData =(this.$refs.WidgetParams as WidgetParams).getVariableValues();
-    this.config.data.userInputData =this.strMapObjChange.strMapToObj((this.$refs.WidgetParams as WidgetParams).getVariableValues());
+    this.config.data.userInputData = this.strMapObjChange.strMapToObj(
+      (this.$refs.WidgetParams as WidgetParams).getVariableValues()
+    );
     return this.config;
   }
 
@@ -113,60 +147,55 @@ export default class State extends Widget {
     temp = JSON.parse(JSON.stringify(temp));
     console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-     console.log(temp);
+    console.log(temp);
     this.userInputData = temp;
-    console.log(this.userInputData);/*  */
-    (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
+    console.log(this.userInputData); /*  */
+    (this.$refs.WidgetParams as WidgetParams).setVariableInput(
+      this.userInputData
+    );
   }
 
-  samplePoke(sample:any)
-  {
+  samplePoke(sample: any) {
     var samplePath = sample.CFET2CORE_SAMPLE_PATH;
-    var pokedPath:string;
+    var pokedPath: string;
     pokedPath = samplePath;
-    var count:number = 0;
+    var count: number = 0;
 
     var temp = sample.Actions.get.Parameters;
     temp = JSON.parse(JSON.stringify(temp));
     temp = this.strMapObjChange.objToStrMap(temp);
-    var Parameters:Map<string, string>;
+    var Parameters: Map<string, string>;
     Parameters = temp;
 
-    Parameters.forEach((value , key) =>{
-          count++;
-          if(count == 1)
-          {
-              pokedPath = pokedPath + "?";
-          }
-           pokedPath = pokedPath + key + "=$" + key + "$&";
+    Parameters.forEach((value, key) => {
+      count++;
+      if (count == 1) {
+        pokedPath = pokedPath + "?";
+      }
+      pokedPath = pokedPath + key + "=$" + key + "$&";
     });
 
-    if(count != 0 )
-    {
-        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    if (count != 0) {
+      pokedPath = pokedPath.substring(0, pokedPath.length - 1);
     }
     this.config.data.url = pokedPath;
   }
 
-  pathPoke()
-  {
-      var f = this.config.data.url; 
-      var pokepath = "a";
-      pokepath = f;
-      axios.get(pokepath).then(response => {
-        this.samplePoke(response.data);
-        this.updateUI();
-      })
+  pathPoke() {
+    var f = this.config.data.url;
+    var pokepath = "a";
+    pokepath = f;
+    axios.get(pokepath).then(response => {
+      this.samplePoke(response.data);
+      this.updateUI();
+    });
   }
 
-  replaceStartPath(startPath:string):void
-  {
-    this.config.data.url.replace('$startPath$', startPath);
+  replaceStartPath(startPath: string): void {
+    this.config.data.url.replace("$startPath$", startPath);
   }
 
-  parentUpdate(payload: UpdatePayload): void {
-    
-  }
+  parentUpdate(payload: UpdatePayload): void {}
 
   refresh() {
     var Args: UpdatePayload = {
@@ -177,30 +206,28 @@ export default class State extends Widget {
     this.viewLoad(Args);
   }
 
-
   async getData(url: string) {
     var apiLoad = url;
     await axios.get(apiLoad).then(response => {
       console.log(response);
       this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
-      switch(this.StatusValue.toString())
-      {
-          case "0":{
-              this.StatusValue ="Idle"
-              break;
-          }
-          case "1":{
-              this.StatusValue ="Ready"
-              break;
-          }
-          case "2":{
-              this.StatusValue ="Running"
-              break;
-          }
-          case "255":{
-              this.StatusValue ="Error"
-              break;
-          }
+      switch (this.StatusValue.toString()) {
+        case "0": {
+          this.StatusValue = "Idle";
+          break;
+        }
+        case "1": {
+          this.StatusValue = "Ready";
+          break;
+        }
+        case "2": {
+          this.StatusValue = "Running";
+          break;
+        }
+        case "255": {
+          this.StatusValue = "Error";
+          break;
+        }
       }
       console.log(this.StatusValue);
     });
@@ -227,5 +254,4 @@ export default class State extends Widget {
   width: 100%;
   height: auto;
 }
-
 </style>

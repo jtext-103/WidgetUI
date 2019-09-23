@@ -118,7 +118,7 @@ export default class App extends Vue {
     var fragment = "a";
     fragment = f;
     console.log(fragment);
-    if (fragment != "#/") {
+    if (fragment != "#/" && fragment != "#") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
       console.log(customViewURL);
@@ -135,13 +135,10 @@ export default class App extends Vue {
             }}).then(dataresponse => {
             console.log(dataresponse.data);
             var resourcetype = dataresponse.data.ResourceType;
-            var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
             this.addWidget(resourcetype);
-            if(resourcetype != "Thing")
-            {
-              var tempRef = (this.lastWidgetIndex - 1).toString();
-              this.pokeAndUpdateUI(tempRef, dataresponse.data);
-            }
+            console.log(resourcetype);
+            var tempRef = (this.lastWidgetIndex - 1).toString();
+            this.pokeAndUpdateUI(tempRef, dataresponse.data);
           });
         } else {
           //返回有值的customview template，进行load处理

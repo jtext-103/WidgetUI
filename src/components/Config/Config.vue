@@ -2,7 +2,7 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="largeFont">getPath: {{ getPathwithVar }}</span>
+        <span style="float:left;" class="smallFont">Path: {{ config.data.get.url }}</span>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
@@ -10,57 +10,76 @@
         </b-button>
       </b-col>
     </b-row>
-    <b-row style="margin-top:10px">
+
+    <br />
+
+    <b-row>
       <b-col>
-        <span style="float:left" class="largeFont">setPath: {{ getSetwithVar }}</span>
+        <div
+          v-if="getConfigValue!=''&&getConfigValue!=undefined"
+          style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
+        >
+          <p style="float:left;margin:0px" class="largeFont">{{ getConfigValue }}</p>
+        </div>
       </b-col>
     </b-row>
-    <div style="width:100%">
-      <span style="float:left;" class="largeFont">{{ getConfigValue }}</span>
-    </div>
-     <br>
-     <br>
-    <div v-show="isShowGetPath">
-      <hr />
-    </div>
-    <b-input-group size="lg" prepend="getPath" v-show="isShowGetPath">
-      <b-form-input v-model="config.data.get.url"></b-form-input>
-      <b-input-group-append>
-        <b-button @click="updateGetUI" text="Button" variant="primary">OK</b-button>
-        <b-button variant="info" @click="getPathPoke">poke</b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <div>
-      <hr v-show="isShowGetParams" />
-    </div>
-    <WidgetParams
-      ref="WidgetGetParams"
-      v-show="isShowGetParams"
-      action="get"
-      @updataVariables="viewGetLoad"
-    ></WidgetParams>
-    <br>
-    <div>
-      <hr v-show="isShowSetPath" />
-    </div>
-    <b-input-group size="lg" prepend="setPath" v-show="isShowSetPath">
-      <b-form-input v-model="config.data.set.url"></b-form-input>
-      <b-input-group-append>
-        <b-button @click="updateSetUI" text="Button" variant="primary">OK</b-button>
-        <b-button variant="info" @click="setPathPoke">poke</b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <div>
-      <hr v-show="isShowSetParams" />
-    </div>
-    <WidgetParams
-      ref="WidgetSetParams"
-      v-show="isShowSetParams"
-      action="set"
-      @updataVariables="viewSetLoad"
-    ></WidgetParams>
-    <br>
-    <Navigation ref="FamilyLink" :url="config.data.get.url"></Navigation>
+
+    <br />
+
+    <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="getPath" v-show="isShowGetPath">
+          <b-form-input v-model="config.data.get.url"></b-form-input>
+          <b-input-group-append>
+            <b-button @click="updateGetUI" text="Button" variant="primary">OK</b-button>
+            <b-button variant="info" @click="getPathPoke">poke</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row>
+      <b-col>
+        <WidgetParams
+          ref="WidgetGetParams"
+          v-show="isShowGetParams"
+          action="get"
+          @updataVariables="viewGetLoad"
+        ></WidgetParams>
+      </b-col>
+    </b-row>
+
+    <br />
+
+    <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="setPath" v-show="isShowSetPath">
+          <b-form-input v-model="config.data.set.url"></b-form-input>
+          <b-input-group-append>
+            <b-button @click="updateSetUI" text="Button" variant="primary">OK</b-button>
+            <b-button variant="info" @click="setPathPoke">poke</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row>
+      <b-col>
+        <WidgetParams
+          ref="WidgetSetParams"
+          v-show="isShowSetParams"
+          action="set"
+          @updataVariables="viewSetLoad"
+        ></WidgetParams>
+      </b-col>
+    </b-row>
+
+    <br />
+    <b-row>
+      <b-col>
+        <Navigation ref="FamilyLink" :url="config.data.get.url"></Navigation>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
@@ -79,7 +98,7 @@ import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { forEach } from "typescript-collections/dist/lib/arrays";
 import { map } from "d3";
-import Navigation from '@/components/Common/Navigation.vue';
+import Navigation from "@/components/Common/Navigation.vue";
 
 @Component({
   components: {
@@ -116,10 +135,13 @@ export default class Config extends Widget {
 
   created() {
     // this.config.data.userInputData = this.userInputData;
-    this.config.data.get.userInputData = this.strMapObjChange.strMapToObj(this.userGetInputData);
-    this.config.data.set.userInputData = this.strMapObjChange.strMapToObj(this.userSetInputData);
+    this.config.data.get.userInputData = this.strMapObjChange.strMapToObj(
+      this.userGetInputData
+    );
+    this.config.data.set.userInputData = this.strMapObjChange.strMapToObj(
+      this.userSetInputData
+    );
   }
-
 
   updateUI() {
     this.updateGetUI();
@@ -147,17 +169,13 @@ export default class Config extends Widget {
   }
 
   showPathConfig() {
-    if(this.isShowGetPath == this.isShowSetPath)
-    {
-        this.isShowGetPath = !this.isShowGetPath;
-        this.isShowSetPath = !this.isShowSetPath;
-    }
-    else 
-    {
+    if (this.isShowGetPath == this.isShowSetPath) {
+      this.isShowGetPath = !this.isShowGetPath;
+      this.isShowSetPath = !this.isShowSetPath;
+    } else {
       this.isShowGetPath = true;
       this.isShowSetPath = true;
     }
-
   }
 
   getConfig(): WidgetConfig {
@@ -199,37 +217,34 @@ export default class Config extends Widget {
     );
   }
 
-  samplePoke(sample:any){
+  samplePoke(sample: any) {
     var samplePath = sample.CFET2CORE_SAMPLE_PATH;
     var pokedPath: string;
     pokedPath = samplePath;
     var count: number = 0;
 
-
     if (this.isSetPoke == false || this.isGetPoke == true) {
       var temp = sample.Actions.get.Parameters;
       temp = JSON.parse(JSON.stringify(temp));
       temp = this.strMapObjChange.objToStrMap(temp);
-      var Parameters:Map<string, string>;
+      var Parameters: Map<string, string>;
       Parameters = temp;
       console.log(Parameters);
 
-      Parameters.forEach((value , key) =>{
-            count++;
-            if(count == 1)
-            {
-                pokedPath = pokedPath + "?";
-            }
-            pokedPath = pokedPath + key + "=$" + key + "$&";
+      Parameters.forEach((value, key) => {
+        count++;
+        if (count == 1) {
+          pokedPath = pokedPath + "?";
+        }
+        pokedPath = pokedPath + key + "=$" + key + "$&";
       });
 
-      if(count != 0 )
-      {
-          pokedPath = pokedPath.substring(0,pokedPath.length-1);
+      if (count != 0) {
+        pokedPath = pokedPath.substring(0, pokedPath.length - 1);
       }
       this.config.data.get.url = pokedPath;
-    } 
-    
+    }
+
     if (this.isGetPoke == false || this.isSetPoke == true) {
       pokedPath = samplePath;
       count = 0;
@@ -238,22 +253,20 @@ export default class Config extends Widget {
       console.log(settemp);
       settemp = JSON.parse(JSON.stringify(settemp));
       settemp = this.strMapObjChange.objToStrMap(settemp);
-      var SetParameters:Map<string, string>;
+      var SetParameters: Map<string, string>;
       SetParameters = settemp;
       console.log(SetParameters);
 
-      SetParameters.forEach((value , key) =>{
-            count++;
-            if(count == 1)
-            {
-                pokedPath = pokedPath + "?";
-            }
-            pokedPath = pokedPath + key + "=$" + key + "$&";
+      SetParameters.forEach((value, key) => {
+        count++;
+        if (count == 1) {
+          pokedPath = pokedPath + "?";
+        }
+        pokedPath = pokedPath + key + "=$" + key + "$&";
       });
 
-      if(count != 0 )
-      {
-          pokedPath = pokedPath.substring(0,pokedPath.length-1);
+      if (count != 0) {
+        pokedPath = pokedPath.substring(0, pokedPath.length - 1);
       }
       this.config.data.set.url = pokedPath;
     }
@@ -261,29 +274,26 @@ export default class Config extends Widget {
     this.isGetPoke = false;
   }
 
-  getPathPoke()
-  {
-      var f = this.config.data.get.url; 
-      var pokepath = "a";
-      pokepath = f;
-      axios.get(pokepath).then(response => {
-        this.isGetPoke = true;
-        this.samplePoke(response.data);
-        this.updateUI();
-      })
+  getPathPoke() {
+    var f = this.config.data.get.url;
+    var pokepath = "a";
+    pokepath = f;
+    axios.get(pokepath).then(response => {
+      this.isGetPoke = true;
+      this.samplePoke(response.data);
+      this.updateUI();
+    });
   }
 
-
-  setPathPoke()
-  {
-      var f = this.config.data.set.url; 
-      var pokepath = "a";
-      pokepath = f;
-      axios.get(pokepath).then(response => {
-        this.isSetPoke = true;
-        this.samplePoke(response.data);
-        this.updateUI();
-      })
+  setPathPoke() {
+    var f = this.config.data.set.url;
+    var pokepath = "a";
+    pokepath = f;
+    axios.get(pokepath).then(response => {
+      this.isSetPoke = true;
+      this.samplePoke(response.data);
+      this.updateUI();
+    });
   }
 
   pathPoke() {
@@ -359,6 +369,7 @@ export default class Config extends Widget {
     console.log(this.setConfigValue);
     console.log(this.setPathwithVar);
     await this.setData(this.setPathwithVar);
+    this.refresh();
   }
 }
 </script>
