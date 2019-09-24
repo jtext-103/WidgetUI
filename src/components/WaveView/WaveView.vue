@@ -5,7 +5,7 @@
     
     </div>
     <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config' @pathPoke="pathPoke"></setBasicParams>
-    <Navigation ref="FamilyLink" :url="config.data.url" style="margin-top:30px"></Navigation>
+    <Navigation ref="FamilyLink" :url="config.data.url.path" style="margin-top:30px"></Navigation>
 </div>
 </template>
 
@@ -98,6 +98,7 @@ export default class waveView extends Widget {
     samplePoke(sample:any)
     {
         var samplePath = sample.CFET2CORE_SAMPLE_PATH;
+        console.log(samplePath);
         var pokedPath:string;
         pokedPath = samplePath;
         var count:number = 0;
@@ -122,17 +123,22 @@ export default class waveView extends Widget {
     {
         pokedPath = pokedPath.substring(0,pokedPath.length-1);
     }
-    this.config.data.url = pokedPath;
+    this.config.data.url.path = pokedPath;
   }
-  pathPoke()
+
+  async pathPoke()
   {
-    var f = this.config.data.url; 
+    (this.$refs.setBasicParams as setBasicParams).updateConfig();
+    var f = this.config.data.url.path; 
     var pokepath = "a";
     pokepath = f;
-    axios.get(this.config.data.url).then(response => {
+    console.log(this.config.data.url.path);
+    await axios.get(this.config.data.url.path).then(response => {
         this.samplePoke(response.data);
-    })
+    });
+    (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
   }
+
 }
 </script>
 
