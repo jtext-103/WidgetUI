@@ -2,7 +2,10 @@
   <div>
     <div v-show="isShowCog" style="width:100%">
       <b-input-group size="lg" prepend="Channel Path">
-        <b-input v-model="config.data.url" ></b-input>
+        <b-input v-model="config.data.url.path" ></b-input>
+      </b-input-group><br>
+      <b-input-group size="lg" prepend="Channel TimePath">
+        <b-input v-model="config.data.url.timePath" ></b-input>
         <b-input-group-addon>
           <b-button variant="primary" @click="getPathIdParams">OK<span class="glyphicon glyphicon-save"></span></b-button>
           <b-button variant="info" @click="pathPoke">poke</b-button>
@@ -38,11 +41,15 @@ export default class setBasicParams extends Vue {
   isShowCog: boolean = false;
   pathId!: string;
   userInputData = new Map<string, string>();
+  tempUserInputData = new Map<string, string>();
   strMapObjChange = new StrMapObjChange();
   config: WidgetConfig = {
     WidgetComponentName: "WaveView",
     data: {
-      url: "10086.data.0/$startTime$/$endTime$/$dotNum$",
+      url: {
+        path:'',
+        timePath:''
+      },
       userInputData: "",
       position: {
         x1: "",
@@ -58,8 +65,8 @@ export default class setBasicParams extends Vue {
 
   created() {
     this.config.data.userInputData = this.userInputData;
-    this.getConfig = this.config;
-    this.updateConfig();
+    // this.getConfig = this.config;
+    // this.updateConfig();
   }
   refresh(){
     var Args: UpdatePayload = {
@@ -73,6 +80,9 @@ export default class setBasicParams extends Vue {
     this.$emit("pathPoke");
   }
   setConfig(config: WidgetConfig) {
+    (this.$refs.WidgetParams as WidgetParams).setVariableList(
+      this.pathProcessor.extractVarFromPath(config.data.url.path)
+    );
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(config.data.userInputData);
     this.config = config;
     console.log(this.config);
@@ -87,12 +97,12 @@ export default class setBasicParams extends Vue {
     this.$emit("updateConfig", this.getConfig);
   }
   getPathIdParams() {
-    if (this.tempUrl != this.config.data.url) {
+    if (this.tempUrl != this.config.data.url.path) {
       this.config.data.userInputData.clear();
-      this.tempUrl = this.config.data.url;
+      this.tempUrl = this.config.data.url.path;
     }
     this.updateConfig();
-    var url = this.config.data.url;
+    var url = this.config.data.url.path;
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
@@ -113,27 +123,29 @@ export default class setBasicParams extends Vue {
     this.getConfig.data.position.y1 = "";
     this.getConfig.data.position.y2 = "";
     this.config.data.userInputData = Args.variables;
+    this.tempUserInputData = this.config.data.userInputData;
     var url = this.pathProcessor.FillPathWithVar(
       this.config.data.userInputData,
-      this.config.data.url
+      this.config.data.url.path
+    );
+    var timeUrl = this.pathProcessor.FillPathWithVar(
+      this.config.data.userInputData,
+      this.config.data.url.timePath
     );
     var first = url.indexOf("/");
     var second = url.indexOf("/", first+1);
     var third = url.indexOf("/", second+1)
-    this.pathId = url.slice(second+1, third);
+    var fouth = url.indexOf("/", third+1)
+    this.pathId = url.slice(third+1, fouth);
     var thingPath = url.slice(0, url.indexOf('/', 2))
     var path = this.pathId;
     var dealPath = {
       thingPath:thingPath,
       path:path
     }
-    var dealFillPath = {
-      url:url.slice(url.indexOf('/', 1)+1),
-      thingPath:thingPath
-    }
     this.$emit("getPathId", dealPath);
-    await this.getData(dealFillPath);
-    await this.getDataTimeAxis(dealFillPath);
+    await this.getData(url);
+    await this.getDataTimeAxis(timeUrl);
     var myPlot = this.wave;
     var data_initial = [
       {
@@ -164,6 +176,9 @@ export default class setBasicParams extends Vue {
     var temp = this.temp;
     var getConfig = this.getConfig;
     var updateConfig = this.updateConfig;
+    var pathProcessor = this.pathProcessor
+    var config = this.config;
+    var tempUserInputData = this.tempUserInputData;
 
     zoom();
     function zoom() {
@@ -184,21 +199,29 @@ export default class setBasicParams extends Vue {
             zoom_xmin = nowZoom_xmin;
             var zoom_ymin = data["yaxis.range[0]"];
             var zoom_ymax = data["yaxis.range[1]"];
-            var url =
-              path +
-              "/" +
-              (zoom_xmin * reAskDataScale).toString() +
-              "/" +
-              (zoom_xmax / reAskDataScale).toString() +
-              "/" +
-              requiredDotNum;
+            var params = [zoom_xmin * reAskDataScale, zoom_xmax / reAskDataScale, requiredDotNum]
+            var index = 0;
+            for(var key of tempUserInputData.keys()){
+              tempUserInputData.set(key, params[index]);
+              index++;
+            }
+            var url = pathProcessor.FillPathWithVar(
+              tempUserInputData,
+              config.data.url.path
+            );
+            var timeUrl = pathProcessor.FillPathWithVar(
+              tempUserInputData,
+              config.data.url.timePath
+            );
+            console.log(url);
+            console.log(timeUrl);
             getConfig.data.position.x1 = zoom_xmin;
             getConfig.data.position.x2 = zoom_xmax;
             getConfig.data.position.y1 = zoom_ymin;
             getConfig.data.position.y2 = zoom_ymax;
             updateConfig();
-            getData(url);
-            getDataTimeAxis(url);
+            // getData(url);
+            // getDataTimeAxis(timeUrl);
             var data_update = [
               {
                 x: temp.dataTimeAxis,
@@ -237,14 +260,14 @@ export default class setBasicParams extends Vue {
     Plotly.newPlot(myPlot, data_update, data_layout, config);
   }
   async getData(url: any) {
-    var apiLoad = url.thingPath + "/DataByTimeFuzzy/" + url.url;
+    var apiLoad = url;
     console.log(apiLoad);//改
     await axios.get(apiLoad).then(response => {
       this.temp.data = response.data.CFET2CORE_SAMPLE_VAL;
     });
   }
   async getDataTimeAxis(url: any) {
-    var apiLoad = url.thingPath + "/DataByTimeFuzzyTimeAxis/" + url.url;
+    var apiLoad = url;
     await axios.get(apiLoad).then(response => {
       this.temp.dataTimeAxis = response.data.CFET2CORE_SAMPLE_VAL;
     });

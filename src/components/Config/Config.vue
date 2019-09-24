@@ -16,7 +16,6 @@
     <b-row>
       <b-col>
         <div
-          v-if="getConfigValue!=''&&getConfigValue!=undefined"
           style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
         >
           <p style="float:left;margin:0px" class="largeFont">{{ getConfigValue }}</p>
@@ -110,7 +109,7 @@ export default class Config extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Config";
-  getConfigValue: string = "";
+  getConfigValue: string = " ";
   setConfigValue: string = "";
   pathId: string = "";
   userGetInputData = new Map<string, string>();
@@ -196,22 +195,16 @@ export default class Config extends Widget {
     //布置get输入参数
     var temp = this.config.data.get.userInputData;
     temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-    console.log(temp);
     this.userGetInputData = temp;
-    console.log(this.userGetInputData); /*  */
     (this.$refs.WidgetGetParams as WidgetParams).setVariableInput(
       this.userGetInputData
     );
     //布置set输入参数
     temp = this.config.data.set.userInputData;
     temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-    console.log(temp);
     this.userSetInputData = temp;
-    console.log(this.userSetInputData); /*  */
     (this.$refs.WidgetSetParams as WidgetParams).setVariableInput(
       this.userSetInputData
     );
@@ -229,7 +222,6 @@ export default class Config extends Widget {
       temp = this.strMapObjChange.objToStrMap(temp);
       var Parameters: Map<string, string>;
       Parameters = temp;
-      console.log(Parameters);
 
       Parameters.forEach((value, key) => {
         count++;
@@ -250,12 +242,10 @@ export default class Config extends Widget {
       count = 0;
 
       var settemp = sample.Actions.set.Parameters;
-      console.log(settemp);
       settemp = JSON.parse(JSON.stringify(settemp));
       settemp = this.strMapObjChange.objToStrMap(settemp);
       var SetParameters: Map<string, string>;
       SetParameters = settemp;
-      console.log(SetParameters);
 
       SetParameters.forEach((value, key) => {
         count++;
@@ -328,19 +318,30 @@ export default class Config extends Widget {
 
   async getData(url: string) {
     var apiLoad = url;
-    await axios.get(apiLoad).then(response => {
-      console.log(response);
+    await axios.get(apiLoad, {
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      }).then(response => {
       this.getConfigValue = response.data.CFET2CORE_SAMPLE_VAL;
+      if(this.getConfigValue == undefined)
+      {
+          this.getConfigValue = "undefined";
+      }
       console.log(this.getConfigValue);
     });
   }
 
   async setData(url: string) {
     var apiLoad = url;
-    await axios.post(apiLoad).then(response => {
-      console.log(response);
+    await axios.post(apiLoad, {
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      }).then(response => {
       this.setConfigValue = response.data.CFET2CORE_SAMPLE_VAL;
-      console.log(this.setConfigValue);
     });
   }
 
@@ -353,8 +354,6 @@ export default class Config extends Widget {
       this.userGetInputData,
       this.config.data.get.url
     );
-    console.log(this.getConfigValue);
-    console.log(this.getPathwithVar);
     await this.getData(this.getPathwithVar);
   }
 
@@ -366,11 +365,20 @@ export default class Config extends Widget {
       this.userSetInputData,
       this.config.data.set.url
     );
-    console.log(this.setConfigValue);
-    console.log(this.setPathwithVar);
     await this.setData(this.setPathwithVar);
-    this.refresh();
+    this.getrefresh();
   }
+
+    getrefresh() {
+    var GetArgs: UpdatePayload = {
+      action: "get",
+      variables: (this.$refs
+        .WidgetGetParams as WidgetParams).getVariableValues(),
+      target: ["self"]
+    };
+    this.viewGetLoad(GetArgs);
+  }
+
 }
 </script>
 

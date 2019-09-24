@@ -1,5 +1,5 @@
 <template>
-    <div class="smallFont" style="float:left width:100%">
+    <div class="largeFont" style="float:left width:100%">
         <span>Basic Path :&nbsp;{{ basePathId }}</span><br>
         <span> Rate: {{ sampleId }}</span><br>
         <span>length: {{ lengthId }}</span>

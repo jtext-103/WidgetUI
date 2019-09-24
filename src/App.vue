@@ -2,21 +2,32 @@
   <div id="app">
     <b-navbar class="Widget">
       <b-dropdown id="dropdown-1" text="Add Widget" class="m-md-2" variant="primary" size="lg">
-        <b-dropdown-item v-for="(availableWidget,index) in availableWidgets" :key="index" class="smallFont">
+        <b-dropdown-item
+          v-for="(availableWidget,index) in availableWidgets"
+          :key="index"
+          class="smallFont"
+        >
           <div v-on:click="addWidget(availableWidget)">{{availableWidget}}</div>
         </b-dropdown-item>
       </b-dropdown>
-      <b-button class="smallFont" @click="saveWidgetList" style="margin-left:2%" variant="primary">Save</b-button>
+      <b-button
+        class="smallFont"
+        @click="saveWidgetList"
+        style="margin-left:2%"
+        variant="primary"
+      >Save</b-button>
       <b-form-file
         id="file"
         type="file"
         @change="loadTextFromFile"
-        placeholder="Choose a widgetTemplate file to laod"
+        placeholder="Choose a widgetTemplate file to load"
         accept=".json"
         style="width:30%;margin-left:2%"
         class="smallFont"
       />
     </b-navbar>
+
+    <!-- <b-button @click="test">test</b-button> -->
 
     <grid-layout
       :layout.sync="widgetList"
@@ -55,14 +66,14 @@
 import { Component, Vue } from "vue-property-decorator";
 import axios from "axios";
 import { GridItemData, GridLayout, GridItem } from "vue-grid-layout";
-import VueRouter from 'vue-router';
+import VueRouter from "vue-router";
 
 import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
 import { Action, UpdatePayload } from "./models/UpdatePayload";
 import { Widget } from "./models/wiget";
 import { ResourceInfo } from "./models/Customview";
-import { indexOf } from 'typescript-collections/dist/lib/arrays';
+import { indexOf } from "typescript-collections/dist/lib/arrays";
 
 //when add more available widgets add ref to the widgets
 import Status from "./components/Status/Status.vue";
@@ -95,7 +106,14 @@ export default class App extends Vue {
   text: string = "";
 
   //when add more available widgets add its name here
-  availableWidgets = ["Status", "Config", "WaveView", "Method", "Thing","State"];
+  availableWidgets = [
+    "Status",
+    "Config",
+    "WaveView",
+    "Method",
+    "Thing",
+    "State"
+  ];
 
   toggleShowAddWidget(): void {
     this.isShowAddWidget = !this.isShowAddWidget;
@@ -103,72 +121,100 @@ export default class App extends Vue {
 
   pokeAndUpdateUI(ref: string, sample: any) {
     Vue.nextTick(() => {
-      console.log(this.$refs[ref]);
-      ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(
-        sample
-      );
+      ((this.$refs[ref] as Array<Widget>)[0] as Widget).samplePoke(sample);
       ((this.$refs[ref] as Array<Widget>)[0] as Widget).updateUI();
     });
   }
 
-  mounted() {
+  dataAccess(URL: string) {
+    var dataURL = "a";
+    dataURL = URL;
+    axios
+      .get(dataURL, {
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache"
+        }
+      })
+      .then(dataresponse => {
+        var resourcetype = dataresponse.data.ResourceType;
+        var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
+        this.addWidget(resourcetype);
+        var tempRef = (this.lastWidgetIndex - 1).toString();
+        this.pokeAndUpdateUI(tempRef, dataresponse.data);
+      });
+  }
+
+  async mounted() {
     // var f1 = window.location.hash;
-    // console.log(typeof(f1));
-    var f = window.location.hash; 
+    var f = window.location.hash;
     var fragment = "a";
     fragment = f;
-    console.log(fragment);
     if (fragment != "#/" && fragment != "#") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
-      console.log(customViewURL);
-      axios.get(customViewURL).then(response => {
-        if (
-          response.data.CFET2CORE_SAMPLE_ISVALID == false ||
-          response.data.CFET2CORE_SAMPLE_VAL == null
-        ) {
-          //直接访问对应的值
-          var dataURL = fragment;
-          console.log(dataURL);
-          axios.get(dataURL,{headers: {
-              "Content-Type":"application/json"
-            }}).then(dataresponse => {
-            console.log(dataresponse.data);
-            var resourcetype = dataresponse.data.ResourceType;
-            this.addWidget(resourcetype);
-            console.log(resourcetype);
-            var tempRef = (this.lastWidgetIndex - 1).toString();
-            this.pokeAndUpdateUI(tempRef, dataresponse.data);
-          });
-        } else {
-          //返回有值的customview template，进行load处理
-          var customviewTemplate: string;
-          customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
-          console.log(customviewTemplate);
-          var widgets = Object.assign(
-            new AllWidgetConfig(),
-            JSON.parse(customviewTemplate)
-          );
-          console.log(widgets);
-          this.widgetList = widgets.widgetList;
-          this.lastWidgetIndex = Number(widgets.currentRef);
-          this.$forceUpdate();
-          //替换startpath
-          Vue.nextTick(() => {
-            // fragment = fragment.substring(1,fragment.length);
-            // for (var wid of this.widgetList) {
-            //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
-            //  }
-            //刷新值
-            this.importActiveWidgetList();
-            // for (var wid of this.widgetList) {
-            //   ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
-            // }
-          });
-        }
-      });
+      var isCustomview: boolean = false;
+      await axios
+        .get(customViewURL, {
+          headers: {
+            Pragma: "no-cache",
+            "Cache-Control": "no-cache"
+          }
+        })
+        .then(response => {
+          if (
+            response.data.CFET2CORE_SAMPLE_ISVALID == true &&
+            response.data.CFET2CORE_SAMPLE_VAL != null
+          ) {
+            isCustomview = true;
+            //返回有值的customview template，进行load处理
+            var customviewTemplate: string;
+            customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
+            var widgets = Object.assign(
+              new AllWidgetConfig(),
+              JSON.parse(customviewTemplate)
+            );
+            this.widgetList = widgets.widgetList;
+            this.lastWidgetIndex = Number(widgets.currentRef);
+            this.$forceUpdate();
+            //替换startpath
+            Vue.nextTick(() => {
+              // fragment = fragment.substring(1,fragment.length);
+              // for (var wid of this.widgetList) {
+              //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
+              //  }
+              //刷新值
+              this.importActiveWidgetList();
+              // for (var wid of this.widgetList) {
+              //   ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).refresh();
+              // }
+            });
+          }
+        });
+
+      if (isCustomview == false) {
+        //直接访问对应的值
+        var dataURL = fragment;
+        this.dataAccess(dataURL);
+      }
     }
   }
+
+  // mounted() {
+  //   var f = window.location.hash;
+  //   var fragment = "a";
+  //   fragment = f;
+  //   fragment = fragment.substring(1, fragment.length);
+
+  //   axios.get(fragment)
+  //     .then(dataresponse => {
+  //       var resourcetype = dataresponse.data.ResourceType;
+  //       var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
+  //       this.addWidget(resourcetype);
+  //       var tempRef = (this.lastWidgetIndex - 1).toString();
+  //       this.pokeAndUpdateUI(tempRef, dataresponse.data);
+  //     });
+  // }
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {
@@ -179,13 +225,11 @@ export default class App extends Vue {
     var widgetConfigList = new AllWidgetConfig();
     widgetConfigList.widgetList = this.widgetList;
     widgetConfigList.currentRef = this.lastWidgetIndex.toString();
-    console.log(widgetConfigList);
     return widgetConfigList;
   }
 
   importActiveWidgetList() {
     for (var wid of this.widgetList) {
-      console.log(wid.widgetConfig);
       ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).setConfig(
         wid.widgetConfig as WidgetConfig
       );
@@ -197,13 +241,11 @@ export default class App extends Vue {
     const reader = new FileReader();
     reader.readAsText(file);
     var widgets;
-    // console.log(this.$refs);
     reader.onload = e => {
       widgets = Object.assign(
         new AllWidgetConfig(),
         JSON.parse((e.target as any).result)
       );
-      // console.log(widgets);
       this.widgetList = widgets.widgetList;
       this.lastWidgetIndex = Number(widgets.currentRef);
       this.$forceUpdate();
@@ -211,13 +253,11 @@ export default class App extends Vue {
         // changed here
         this.importActiveWidgetList();
       });
-      // console.log(this.$refs);
     };
   }
 
   saveWidgetList(): void {
     var data = JSON.stringify(this.exportActiveWidgetList());
-    console.log(data);
 
     const blob = new Blob([data]);
     if (window.navigator.msSaveOrOpenBlob) {

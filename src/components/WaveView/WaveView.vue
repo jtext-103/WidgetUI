@@ -40,7 +40,10 @@ export default class waveView extends Widget {
     config: WidgetConfig = {
         WidgetComponentName: 'WaveView',
         data: {
-            url:'',
+            url:{
+                path:'',
+                timePath:''
+            },
             userInputData:'',
             position:{
                 x1:'',
@@ -62,11 +65,13 @@ export default class waveView extends Widget {
     }
     setConfig(widgetConfig:WidgetConfig): void {
         this.config = widgetConfig;
+        console.log(widgetConfig);
         var temp = this.config.data.userInputData;
         this.updateUI();
         var temp = JSON.parse(JSON.stringify(temp));
         temp = this.strMapObjChange.objToStrMap(temp);
         widgetConfig.data.userInputData = temp;
+        console.log(widgetConfig);
         (this.$refs.setBasicParams as setBasicParams).setConfig(widgetConfig);
     }
     parentUpdate(payload: UpdatePayload): void {

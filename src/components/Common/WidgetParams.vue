@@ -34,13 +34,11 @@ export default class WidgetParams extends Vue{
         path.forEach(element => {
             this.userInputData.set(element, '');
         });
-        console.log(this.userInputData);
         this.$forceUpdate();
     }
 
     setVariableInput(parentUserInputData:Map<string, string>)
     {
-       console.log(parentUserInputData);
        for (var key of parentUserInputData.keys()) {
              this.tempUserInputData[key] = parentUserInputData.get(key) as string;
         }

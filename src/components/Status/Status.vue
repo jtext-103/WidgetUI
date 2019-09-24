@@ -16,7 +16,6 @@
     <b-row>
       <b-col>
         <div
-          v-if="StatusValue!=''&&StatusValue!=undefined"
           style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
         >
           <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
@@ -144,11 +143,8 @@ export default class Status extends Widget {
     //map不能序列化，必须要单独处理，这里的处理方法仅限map<string,string>类型
     var temp = this.config.data.userInputData;
     temp = JSON.parse(JSON.stringify(temp));
-    console.log(temp);
     temp = this.strMapObjChange.objToStrMap(temp);
-    console.log(temp);
     this.userInputData = temp;
-    console.log(this.userInputData); /*  */
     (this.$refs.WidgetParams as WidgetParams).setVariableInput(
       this.userInputData
     );
@@ -184,7 +180,12 @@ export default class Status extends Widget {
     var f = this.config.data.url;
     var pokepath = "a";
     pokepath = f;
-    axios.get(pokepath).then(response => {
+    axios.get(pokepath, {
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      }).then(response => {
       this.samplePoke(response.data);
       this.updateUI();
     });
@@ -207,11 +208,20 @@ export default class Status extends Widget {
 
   async getData(url: string) {
     var apiLoad = url;
-    await axios.get(apiLoad).then(response => {
-      console.log(response);
-      this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
-      console.log(this.StatusValue);
-    });
+    await axios
+      .get(apiLoad, {
+        headers: {
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache"
+        }
+      })
+      .then(response => {
+        this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
+        if(this.StatusValue == undefined)
+        {
+            this.StatusValue = "undefined";
+        }
+      });
   }
 
   //called when widgetParams action clicked
@@ -223,8 +233,6 @@ export default class Status extends Widget {
       this.userInputData,
       this.config.data.url
     );
-    console.log(this.StatusValue);
-    console.log(this.pathwithVar);
     await this.getData(this.pathwithVar);
   }
 }
