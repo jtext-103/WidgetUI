@@ -137,9 +137,19 @@ export default class App extends Vue {
         }
       })
       .then(dataresponse => {
-        var resourcetype = dataresponse.data.ResourceType;
-        var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
-        this.addWidget(resourcetype);
+        var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH as string;
+        console.log(samplePath);
+        samplePath = samplePath.slice(samplePath.lastIndexOf('/')+1);
+        console.log(samplePath);
+        if(samplePath.startsWith("data")|| samplePath.startsWith("Data"))
+        {
+          console.log("success");
+          this.addWidget("WaveView");
+        }
+        else{
+          var resourcetype = dataresponse.data.ResourceType;
+          this.addWidget(resourcetype);
+        }
         var tempRef = (this.lastWidgetIndex - 1).toString();
         this.pokeAndUpdateUI(tempRef, dataresponse.data);
       });
