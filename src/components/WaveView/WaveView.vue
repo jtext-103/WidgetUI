@@ -4,7 +4,7 @@
     <div ref="wave">
     
     </div>
-    <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config' @pathPoke="pathPoke"></setBasicParams>
+    <setBasicParams ref="setBasicParams" @getPathId="getPathId" @updateConfig="updateConfig" :wave="wave" :setConfig='config' @pathPoke="pathPoke" @pathPokeTime="pathPokeTime"></setBasicParams>
     <Navigation ref="FamilyLink" :url="config.data.url.path" style="margin-top:30px"></Navigation>
 </div>
 </template>
@@ -98,7 +98,6 @@ export default class waveView extends Widget {
     samplePoke(sample:any)
     {
         var samplePath = sample.CFET2CORE_SAMPLE_PATH;
-        console.log(samplePath);
         var pokedPath:string;
         pokedPath = samplePath;
         var count:number = 0;
@@ -125,7 +124,35 @@ export default class waveView extends Widget {
     }
     this.config.data.url.path = pokedPath;
   }
+  samplePokeTime(sample:any)
+    {
+        var samplePath = sample.CFET2CORE_SAMPLE_PATH;
+        var pokedPath:string;
+        pokedPath = samplePath;
+        var count:number = 0;
 
+        var temp = sample.Actions.get.Parameters;
+        temp = JSON.parse(JSON.stringify(temp));
+        console.log(temp);
+        temp = this.strMapObjChange.objToStrMap(temp);
+        console.log(temp);
+        var Parameters:Map<string, string>;
+        Parameters = temp;
+
+        Parameters.forEach((value , key) =>{
+            count++;
+            if(count == 1)
+            {
+                pokedPath = pokedPath + "?";
+            }
+            pokedPath = pokedPath + key + "=$" + key + "$&";
+    });
+    if(count != 0 )
+    {
+        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+    }
+    this.config.data.url.timePath = pokedPath;
+  }
   async pathPoke()
   {
     (this.$refs.setBasicParams as setBasicParams).updateConfig();
@@ -136,9 +163,24 @@ export default class waveView extends Widget {
     await axios.get(this.config.data.url.path).then(response => {
         this.samplePoke(response.data);
     });
-    (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+    if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
+        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+    }
   }
-
+  async pathPokeTime()
+  {
+    (this.$refs.setBasicParams as setBasicParams).updateConfig();
+    var f = this.config.data.url.timePath; 
+    var pokepath = "a";
+    pokepath = f;
+    console.log(this.config.data.url.timePath);
+    await axios.get(this.config.data.url.timePath).then(response => {
+        this.samplePokeTime(response.data);
+    });
+    if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
+        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+    }
+  }
 }
 </script>
 

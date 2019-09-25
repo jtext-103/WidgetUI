@@ -3,12 +3,13 @@
     <div v-show="isShowCog" style="width:100%">
       <b-input-group size="lg" prepend="Channel Path">
         <b-input v-model="config.data.url.path" ></b-input>
+        <b-button variant="info" @click="pathPoke">poke</b-button>
       </b-input-group><br>
       <b-input-group size="lg" prepend="Channel TimePath">
         <b-input v-model="config.data.url.timePath" ></b-input>
         <b-input-group-addon>
           <b-button variant="primary" @click="getPathIdParams">OK<span class="glyphicon glyphicon-save"></span></b-button>
-          <b-button variant="info" @click="pathPoke">poke</b-button>
+          <b-button variant="info" @click="pathPokeTime">poke</b-button>
         </b-input-group-addon>
       </b-input-group>
     </div>
@@ -65,8 +66,6 @@ export default class setBasicParams extends Vue {
 
   created() {
     this.config.data.userInputData = this.userInputData;
-    // this.getConfig = this.config;
-    // this.updateConfig();
   }
   refresh(){
     var Args: UpdatePayload = {
@@ -78,6 +77,9 @@ export default class setBasicParams extends Vue {
   }
   pathPoke(){
     this.$emit("pathPoke");
+  }
+  pathPokeTime(){
+    this.$emit("pathPokeTime");
   }
   setConfig(config: WidgetConfig) {
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
@@ -103,6 +105,19 @@ export default class setBasicParams extends Vue {
     }
     this.updateConfig();
     var url = this.config.data.url.path;
+    (this.$refs.WidgetParams as WidgetParams).setVariableList(
+      this.pathProcessor.extractVarFromPath(url)
+    );
+    this.isShowLoad = true;
+    this.isShowCog = false;
+  }
+  getPathIdParamsTime() {
+    if (this.tempUrl != this.config.data.url.timePath) {
+      this.config.data.userInputData.clear();
+      this.tempUrl = this.config.data.url.timePath;
+    }
+    this.updateConfig();
+    var url = this.config.data.url.timePath;
     (this.$refs.WidgetParams as WidgetParams).setVariableList(
       this.pathProcessor.extractVarFromPath(url)
     );
