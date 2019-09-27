@@ -1,11 +1,13 @@
 # WidgetUI设计文档
 WidgetUI是为CFET控制框架设计的网页界面显示。
+
 ![](2019-09-27-16-06-55.png)
 ## Widget
 widget是WidgetUI的显示控件，是CFET中的resource在网页界面的一种显示形式。每个WidgetUI界面是数个Widget加导航栏的组成。
 ### Widget Base
 每个Widge都有共同的性质，这些性质被描述在Widget基类中，被每个Widget继承。
 这些性质具体如下：
+
 ![](2019-09-27-16-32-02.png)
 1. 每个Widget的类型名称
 > WidgetComponentName。目前的类型按功能逻辑分类主要有Status，Method，Config，Thing，WaveView。按照显示样式的不同有State。之后根据需求还会陆续添加。
@@ -13,6 +15,7 @@ widget是WidgetUI的显示控件，是CFET中的resource在网页界面的一种
 > getConfig：每个widget需要将自身的内容以给定的格式保存起来提供给Parent。
 setConfig：根据Parent提供的数据填充自己的路径和输入框中的值，同时更新界面。
 给定格式：
+
 ![](2019-09-27-17-41-30.png)
 3. 刷新自身界面
 > 根据当前的URL生成对应输入框等显示。
