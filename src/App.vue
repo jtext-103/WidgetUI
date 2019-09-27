@@ -71,7 +71,7 @@ import VueRouter from "vue-router";
 import { WidgetRef } from "./models/WidgetRef";
 import { WidgetConfig, AllWidgetConfig } from "./models/WidgetConfig";
 import { Action, UpdatePayload } from "./models/UpdatePayload";
-import { Widget } from "./models/wiget";
+import { Widget } from "./models/widget";
 import { ResourceInfo } from "./models/Customview";
 import { indexOf } from "typescript-collections/dist/lib/arrays";
 
@@ -209,22 +209,6 @@ export default class App extends Vue {
       }
     }
   }
-
-  // mounted() {
-  //   var f = window.location.hash;
-  //   var fragment = "a";
-  //   fragment = f;
-  //   fragment = fragment.substring(1, fragment.length);
-
-  //   axios.get(fragment)
-  //     .then(dataresponse => {
-  //       var resourcetype = dataresponse.data.ResourceType;
-  //       var samplePath = dataresponse.data.CFET2CORE_SAMPLE_PATH;
-  //       this.addWidget(resourcetype);
-  //       var tempRef = (this.lastWidgetIndex - 1).toString();
-  //       this.pokeAndUpdateUI(tempRef, dataresponse.data);
-  //     });
-  // }
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {

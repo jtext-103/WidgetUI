@@ -65,7 +65,7 @@ import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { WidgetConfig } from "@/models/WidgetConfig";
 import { UpdatePayload } from "@/models/UpdatePayload";
-import { Widget } from "@/models/wiget";
+import { Widget } from "@/models/widget";
 import { ResourceInfo } from "@/models/Customview";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import axios from "axios";
