@@ -24,6 +24,9 @@ setConfig：根据Parent提供的数据填充自己的路径和输入框中的�
 5. 根据给定路径自动填充返回完整路径
 > 路径的来源有两种。一个是Parent向widget提供sample，根据sample中的参数信息将变量补充在URL后。二是根据用户在输入框中输入的URL去向后台请求sample，从而对URL进行填充。
 
+### Widget Type
+1. 
+
 ## Parent
 Parent是对所有widget进行管理的部分，是所有widget的父组件。
 主要功能分为两部分，一是对Widget的管理，二是支持根据当前URL生成对应widget或者customview。

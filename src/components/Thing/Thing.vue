@@ -158,9 +158,7 @@ export default class Thing extends Widget {
   }
 
   pathPoke() {
-    var f = this.config.data.url;
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.url;
     axios.get(pokepath).then(response => {
       this.samplePoke(response.data);
       this.updateUI();

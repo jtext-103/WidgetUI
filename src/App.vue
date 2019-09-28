@@ -127,10 +127,8 @@ export default class App extends Vue {
   }
 
   dataAccess(URL: string) {
-    var dataURL = "a";
-    dataURL = URL;
     axios
-      .get(dataURL, {
+      .get(URL, {
         headers: {
           Pragma: "no-cache",
           "Cache-Control": "no-cache"
@@ -156,11 +154,8 @@ export default class App extends Vue {
   }
 
   async mounted() {
-    // var f1 = window.location.hash;
-    var f = window.location.hash;
-    var fragment = "a";
-    fragment = f;
-    if (fragment != "#/" && fragment != "#") {
+    var fragment = window.location.hash;
+    if (fragment != "#blank" && fragment != "#Blank") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
       var isCustomview: boolean = false;

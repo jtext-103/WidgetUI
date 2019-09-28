@@ -156,9 +156,7 @@ export default class waveView extends Widget {
   async pathPoke()
   {
     (this.$refs.setBasicParams as setBasicParams).updateConfig();
-    var f = this.config.data.url.path; 
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.url.path; 
     console.log(this.config.data.url.path);
     await axios.get(this.config.data.url.path).then(response => {
         this.samplePoke(response.data);
@@ -170,9 +168,7 @@ export default class waveView extends Widget {
   async pathPokeTime()
   {
     (this.$refs.setBasicParams as setBasicParams).updateConfig();
-    var f = this.config.data.url.timePath; 
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.url.timePath; 
     console.log(this.config.data.url.timePath);
     await axios.get(this.config.data.url.timePath).then(response => {
         this.samplePokeTime(response.data);

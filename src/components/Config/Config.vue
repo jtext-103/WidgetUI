@@ -265,9 +265,7 @@ export default class Config extends Widget {
   }
 
   getPathPoke() {
-    var f = this.config.data.get.url;
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.get.url;
     axios.get(pokepath).then(response => {
       this.isGetPoke = true;
       this.samplePoke(response.data);
@@ -276,9 +274,7 @@ export default class Config extends Widget {
   }
 
   setPathPoke() {
-    var f = this.config.data.set.url;
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.set.url;
     axios.get(pokepath).then(response => {
       this.isSetPoke = true;
       this.samplePoke(response.data);

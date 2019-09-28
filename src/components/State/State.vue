@@ -178,9 +178,7 @@ export default class State extends Widget {
   }
 
   pathPoke() {
-    var f = this.config.data.url;
-    var pokepath = "a";
-    pokepath = f;
+    var pokepath = this.config.data.url;
     axios.get(pokepath, {
         headers: {
           'Pragma': 'no-cache',
