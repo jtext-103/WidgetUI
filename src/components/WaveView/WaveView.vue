@@ -117,14 +117,15 @@ export default class waveView extends Widget {
                 pokedPath = pokedPath + "?";
             }
             pokedPath = pokedPath + key + "=$" + key + "$&";
-    });
-    if(count != 0 )
-    {
-        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+        });
+        if(count != 0 )
+        {
+            pokedPath = pokedPath.substring(0,pokedPath.length-1);
+        }
+        this.config.data.url.path = pokedPath;
+        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
     }
-    this.config.data.url.path = pokedPath;
-  }
-  samplePokeTime(sample:any)
+    samplePokeWith(sample:any)
     {
         var samplePath = sample.CFET2CORE_SAMPLE_PATH;
         var pokedPath:string;
@@ -146,37 +147,70 @@ export default class waveView extends Widget {
                 pokedPath = pokedPath + "?";
             }
             pokedPath = pokedPath + key + "=$" + key + "$&";
-    });
-    if(count != 0 )
+        });
+        if(count != 0 )
+        {
+            pokedPath = pokedPath.substring(0,pokedPath.length-1);
+        }
+        this.config.data.url.path = pokedPath;
+    }
+    samplePokeWithTime(sample:any)
     {
-        pokedPath = pokedPath.substring(0,pokedPath.length-1);
+        var samplePath = sample.CFET2CORE_SAMPLE_PATH;
+        var pokedPath:string;
+        pokedPath = samplePath;
+        var count:number = 0;
+
+        var temp = sample.Actions.get.Parameters;
+        temp = JSON.parse(JSON.stringify(temp));
+        console.log(temp);
+        temp = this.strMapObjChange.objToStrMap(temp);
+        console.log(temp);
+        var Parameters:Map<string, string>;
+        Parameters = temp;
+
+        Parameters.forEach((value , key) =>{
+            count++;
+            if(count == 1)
+            {
+                pokedPath = pokedPath + "?";
+            }
+            pokedPath = pokedPath + key + "=$" + key + "$&";
+        });
+        if(count != 0 )
+        {
+            pokedPath = pokedPath.substring(0,pokedPath.length-1);
+        }
+        this.config.data.url.timePath = pokedPath;
     }
-    this.config.data.url.timePath = pokedPath;
-  }
-  async pathPoke()
-  {
-    (this.$refs.setBasicParams as setBasicParams).updateConfig();
-    var pokepath = this.config.data.url.path; 
-    console.log(this.config.data.url.path);
-    await axios.get(this.config.data.url.path).then(response => {
-        this.samplePoke(response.data);
-    });
-    if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
-        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+    async pathPoke()
+    {
+        (this.$refs.setBasicParams as setBasicParams).updateConfig();
+        var f = this.config.data.url.path; 
+        var pokepath = "a";
+        pokepath = f;
+        console.log(this.config.data.url.path);
+        await axios.get(this.config.data.url.path).then(response => {
+            this.samplePokeWith(response.data);
+        });
+        if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
+            (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+        }
     }
-  }
-  async pathPokeTime()
-  {
-    (this.$refs.setBasicParams as setBasicParams).updateConfig();
-    var pokepath = this.config.data.url.timePath; 
-    console.log(this.config.data.url.timePath);
-    await axios.get(this.config.data.url.timePath).then(response => {
-        this.samplePokeTime(response.data);
-    });
-    if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
-        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+    async pathPokeTime()
+    {
+        (this.$refs.setBasicParams as setBasicParams).updateConfig();
+        var f = this.config.data.url.timePath; 
+        var pokepath = "a";
+        pokepath = f;
+        console.log(this.config.data.url.timePath);
+        await axios.get(this.config.data.url.timePath).then(response => {
+            this.samplePokeWithTime(response.data);
+        });
+        if(this.config.data.url.path != '' && this.config.data.url.timePath != ''){
+            (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+        }
     }
-  }
 }
 </script>
 
