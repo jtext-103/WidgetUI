@@ -9,23 +9,35 @@ widget是WidgetUI的显示控件，是CFET中的resource在网页界面的一种
 这些性质具体如下：
 
 ![](2019-09-27-16-32-02.png)
-1. 每个Widget的类型名称
-> WidgetComponentName。目前的类型按功能逻辑分类主要有Status，Method，Config，Thing，WaveView。按照显示样式的不同有State。之后根据需求还会陆续添加。
-2. 保存和加载自身配置
+1. 每个Widget的类型名称(WidgetComponentName)
+> 目前的类型按功能逻辑分类主要有Status，Method，Config，Thing，WaveView。按照显示样式的不同有State。之后根据需求还会陆续添加。
+2. 保存和加载自身配置(getConfig，setConfig)
 > getConfig：每个widget需要将自身的内容以给定的格式保存起来提供给Parent。
 setConfig：根据Parent提供的数据填充自己的路径和输入框中的值，同时更新界面。
 给定格式：
 
 ![](2019-09-27-17-41-30.png)
-3. 刷新自身界面
+3. 刷新自身界面(updateUI)
 > 根据当前的URL生成对应输入框等显示。
-4. 刷新自身值
-> 根据当前URL和输入框变量值向后台通过axios发出请求，根据返回值刷新显示值。
-5. 根据给定路径自动填充返回完整路径
-> 路径的来源有两种。一个是Parent向widget提供sample，根据sample中的参数信息将变量补充在URL后。二是根据用户在输入框中输入的URL去向后台请求sample，从而对URL进行填充。
+4. 刷新自身值(refresh)
+> refresh:根据当前URL和输入框变量值向后台通过axios发出请求，根据返回值刷新显示值。
+5. 根据给定路径自动填充返回完整路径(samplePoke，pathPoke)
+> samplePoke是根据sample中的参数信息将变量补充在URL后生成一个完整的URL。
+路径的来源有两种。
+  一个是Parent向widget提供sample，调用每个widget的samplePoke。
+  二对应pathPoke，是根据用户在输入框中输入的URL去向后台请求sample，然后自身调用自己的samplepoke从而对URL进行填充。
 
-### Widget Type
-1. 
+除了基类里的一些共有性质，每个widget也有共有的2个组件。
+![](2019-09-29-15-22-37.png)
+1. 变量输入框组(WidgetParams)
+> 每个widget都需要一个输入框组提供给用户用来接收变量值，从而填补完全路径来和后台交互数据。
+WidgetParams主要有4个方法：
+setVariableList: 父组件将URL中后缀的参数信息传进来，WidgetParams根据参数信息生成对应的输入框。
+setVariableInput: 这个方法用于加载保存配置时，setconfig时获取WidgetConfig中的参数信息来填写对应参数的输入框的值。
+
+2. 父子路径导航(Navigation)
+
+
 
 ## Parent
 Parent是对所有widget进行管理的部分，是所有widget的父组件。

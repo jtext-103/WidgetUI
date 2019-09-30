@@ -153,13 +153,13 @@ export default class App extends Vue {
       });
   }
 
-  async mounted() {
+ mounted() {
     var fragment = window.location.hash;
-    if (fragment != "#blank" && fragment != "#Blank") {
+    if (fragment != "#blank" && fragment != "#Blank" && fragment != "#") {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
       var isCustomview: boolean = false;
-      await axios
+      axios
         .get(customViewURL, {
           headers: {
             Pragma: "no-cache",
@@ -172,6 +172,7 @@ export default class App extends Vue {
             response.data.CFET2CORE_SAMPLE_VAL != null
           ) {
             isCustomview = true;
+           
             //返回有值的customview template，进行load处理
             var customviewTemplate: string;
             customviewTemplate = response.data.CFET2CORE_SAMPLE_VAL;
@@ -195,13 +196,14 @@ export default class App extends Vue {
               // }
             });
           }
+          else{
+            var dataURL = fragment;
+            this.dataAccess(dataURL);
+          }
+        }).catch(err=>{
+            var dataURL = fragment;
+            this.dataAccess(dataURL);
         });
-
-      if (isCustomview == false) {
-        //直接访问对应的值
-        var dataURL = fragment;
-        this.dataAccess(dataURL);
-      }
     }
   }
 
