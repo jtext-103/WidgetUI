@@ -101,7 +101,6 @@ export default class Status extends Widget {
   };
 
   created() {
-    // this.config.data.userInputData = this.userInputData;
     this.config.data.userInputData = this.strMapObjChange.strMapToObj(
       this.userInputData
     );

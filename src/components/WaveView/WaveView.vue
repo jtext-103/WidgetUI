@@ -37,6 +37,7 @@ export default class waveView extends Widget {
     pathId: string = '';
     strMapObjChange = new StrMapObjChange();
     userInputData = new Map<string, string>();
+    sampleVal!:any;
     config: WidgetConfig = {
         WidgetComponentName: 'WaveView',
         data: {
@@ -84,7 +85,10 @@ export default class waveView extends Widget {
         (this.$refs.setBasicParams as setBasicParams).refresh();
     }
     updateUI() {
-        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
+        (this.$refs.setBasicParams as setBasicParams).getSampleParams(this.config.data.url.path);
+        if(Array.isArray(this.sampleVal)) {
+            (this.$refs.setBasicParams as setBasicParams).sampleLoad(this.sampleVal);
+        }
     }
     getPathId(pathId: string) {
         this.pathId = pathId;
@@ -98,6 +102,7 @@ export default class waveView extends Widget {
     samplePoke(sample:any)
     {
         var samplePath = sample.CFET2CORE_SAMPLE_PATH;
+        this.sampleVal = sample.CFET2CORE_SAMPLE_VAL;
         var pokedPath:string;
         pokedPath = samplePath;
         var count:number = 0;
@@ -123,7 +128,6 @@ export default class waveView extends Widget {
             pokedPath = pokedPath.substring(0,pokedPath.length-1);
         }
         this.config.data.url.path = pokedPath;
-        (this.$refs.setBasicParams as setBasicParams).getPathIdParams();
     }
     samplePokeWith(sample:any)
     {

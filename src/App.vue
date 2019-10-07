@@ -159,6 +159,7 @@ export default class App extends Vue {
       fragment = fragment.substring(1, fragment.length);
       var customViewURL = "/customView/template" + fragment;
       var isCustomview: boolean = false;
+      //axios之前出现过cache过多刷不出来的问题，所以本项目的axios都加上了禁止cache的头文件
       axios
         .get(customViewURL, {
           headers: {

@@ -66,6 +66,7 @@ export default class setBasicParams extends Vue {
 
   created() {
     this.config.data.userInputData = this.userInputData;
+    this.getConfig = this.config;
   }
   refresh(){
     var Args: UpdatePayload = {
@@ -97,6 +98,14 @@ export default class setBasicParams extends Vue {
   updateConfig() {
     this.getConfig = this.config;
     this.$emit("updateConfig", this.getConfig);
+  }
+  getSampleParams(url:any){
+    (this.$refs.WidgetParams as WidgetParams).setVariableList(
+      this.pathProcessor.extractVarFromPath(url)
+    );
+    this.config.data.url.path = url;
+    this.isShowLoad = true;
+    this.isShowCog = false;
   }
   getPathIdParams() {
     if (this.tempUrl != this.config.data.url.path) {
@@ -132,6 +141,16 @@ export default class setBasicParams extends Vue {
       this.isShowCog = !this.isShowCog;
     }
   }
+  sampleLoad(sampleVal: any){
+    var myPlot = this.wave;
+    var data_initial = [
+      {
+        x: this.temp.dataTimeAxis,
+        y: sampleVal
+      }
+    ];
+    this.createChannelChart(myPlot, data_initial);
+  }
   async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
     this.getConfig.data.position.x2 = "";
@@ -152,7 +171,7 @@ export default class setBasicParams extends Vue {
     var third = url.indexOf("/", second+1)
     var fouth = url.indexOf("/", third+1)
     this.pathId = url.slice(third+1, fouth);
-    var thingPath = url.slice(0, url.indexOf('/', 2))
+    var thingPath = url.slice(0, url.indexOf('/', 2));
     var path = this.pathId;
     var dealPath = {
       thingPath:thingPath,
