@@ -23,7 +23,10 @@ export default class PathProcessor {
         const result = path.match(urlRegExp);
         if (result != null) {
             result.forEach((element: string) => {
-            inputLabel.push(element);
+            if(element != "")
+            {
+                inputLabel.push(element);
+            }
             });
         }
         return inputLabel;
