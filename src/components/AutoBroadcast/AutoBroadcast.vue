@@ -80,7 +80,7 @@ import Navigation from "@/components/Common/Navigation.vue";
     Navigation
   }
 })
-export default class VarBroadcast extends Widget {
+export default class Status extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Status";

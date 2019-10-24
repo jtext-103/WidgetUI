@@ -13,7 +13,7 @@ export abstract class Widget extends Vue {
   public WidgetComponentName?: string;
   public abstract setConfig(wid: WidgetConfig): void;
   public abstract getConfig(): WidgetConfig;
-  public abstract parentUpdate(paylosd: UpdatePayload): void;
+  public abstract parentUpdate(payload: UpdatePayload): void;
   public abstract refresh(): void;
   public abstract updateUI(): void;
   public abstract replaceStartPath(startPath:string):void;

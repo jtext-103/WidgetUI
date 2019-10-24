@@ -15,18 +15,6 @@
 
     <b-row>
       <b-col>
-        <div
-          style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
-        >
-          <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
-        </div>
-      </b-col>
-    </b-row>
-
-    <br />
-
-    <b-row>
-      <b-col>
         <b-input-group size="lg" prepend="path" v-show="isShowPath">
           <b-form-input v-model="config.data.url"></b-form-input>
           <b-input-group-append>
@@ -78,7 +66,7 @@ import Navigation from "@/components/Common/Navigation.vue";
 export default class VarBroadcast extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
-  WidgetComponentName: string = "Status";
+  WidgetComponentName: string = "VarBroadcast";
   StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
@@ -88,7 +76,7 @@ export default class VarBroadcast extends Widget {
   isShowParams: boolean = false;
 
   config: WidgetConfig = {
-    WidgetComponentName: "Status",
+    WidgetComponentName: "VarBroadcast",
     data: {
       url: "",
       userInputData: ""
@@ -99,14 +87,6 @@ export default class VarBroadcast extends Widget {
     this.config.data.userInputData = this.strMapObjChange.strMapToObj(
       this.userInputData
     );
-  }
-
-  mounted() {
-    this.timer = setInterval(this.refresh, 1000);
-  }
-
-  destroyed() {
-    clearInterval(this.timer);
   }
 
   updateUI() {
@@ -220,6 +200,7 @@ export default class VarBroadcast extends Widget {
   viewLoad(Args: UpdatePayload) {
     // this.config.data.userInputData = Args.variables;
      PubSub.publish('VarBroadcast',Args);
+     console.log(Args);
   }
 }
 </script>
