@@ -292,7 +292,39 @@ export default class Config extends Widget {
     this.config.data.set.url.replace("$startPath$", startPath);
   }
 
-  parentUpdate(payload: UpdatePayload): void {}
+  parentUpdate(payload: UpdatePayload): void {
+    this.userGetInputData = this.strMapObjChange.strMapToObj(
+       (this.$refs.WidgetGetParams as WidgetParams).getVariableValues());
+      var temp = this.userGetInputData;
+      temp = JSON.parse(JSON.stringify(temp));
+      temp = this.strMapObjChange.objToStrMap(temp);
+      this.userGetInputData = temp;
+      this.userGetInputData.forEach((value , key) =>{
+        payload.variables.forEach((valueofpayload,keyofpayload)=>{
+        if(key == keyofpayload)
+        {
+          this.userGetInputData.set(key,payload.variables.get(keyofpayload) as string);
+        }
+      });
+    });
+    (this.$refs.WidgetGetParams as WidgetParams).setVariableInput(this.userGetInputData);
+
+    this.userSetInputData = this.strMapObjChange.strMapToObj(
+       (this.$refs.WidgetSetParams as WidgetParams).getVariableValues());
+      temp = this.userSetInputData;
+      temp = JSON.parse(JSON.stringify(temp));
+      temp = this.strMapObjChange.objToStrMap(temp);
+      this.userSetInputData = temp;
+      this.userSetInputData.forEach((value , key) =>{
+        payload.variables.forEach((valueofpayload,keyofpayload)=>{
+        if(key == keyofpayload)
+        {
+          this.userSetInputData.set(key,payload.variables.get(keyofpayload) as string);
+        }
+      });
+    });
+    (this.$refs.WidgetSetParams as WidgetParams).setVariableInput(this.userSetInputData);
+  }
 
   refresh() {
     var GetArgs: UpdatePayload = {

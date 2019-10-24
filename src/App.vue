@@ -83,6 +83,7 @@ import Config from "./components/Config/Config.vue";
 import Thing from "./components/Thing/Thing.vue";
 import State from "./components/State/State.vue";
 import VarBroadcast from "./components/VarBroadcast/VarBroadcast.vue";
+import AutoBroadcast from "./components/AutoBroadcast/AutoBroadcast.vue";
 // import Gauge from "./components/Gauge/Gauge.vue";
 
 //this is the view selecotr class
@@ -97,7 +98,8 @@ import VarBroadcast from "./components/VarBroadcast/VarBroadcast.vue";
     GridLayout,
     GridItem,
     State,
-    VarBroadcast
+    VarBroadcast,
+    AutoBroadcast
   }
 })
 export default class App extends Vue {
@@ -115,7 +117,8 @@ export default class App extends Vue {
     "Method",
     "Thing",
     "State",
-    "VarBroadcast"
+    "VarBroadcast",
+    "AutoBroadcast"
   ];
 
   toggleShowAddWidget(): void {
@@ -211,11 +214,9 @@ export default class App extends Vue {
     }
 
     PubSub.subscribe("VarBroadcast",(messageName, Args)=>{
-      console.log(Args);
       //接收到消息调用全部widget的parentUpdate函数
       for (var widget of this.widgetList) {
       ((this.$refs[widget.ref] as Array<Widget>)[0] as Widget).parentUpdate(Args);}
-      console.log(this.$refs[widget.ref]);
     });
   }
 

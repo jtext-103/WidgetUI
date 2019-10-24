@@ -194,7 +194,26 @@ export default class State extends Widget {
     this.config.data.url.replace("$startPath$", startPath);
   }
 
-  parentUpdate(payload: UpdatePayload): void {}
+   parentUpdate(payload: UpdatePayload): void {
+    this.userInputData = this.strMapObjChange.strMapToObj(
+      (this.$refs.WidgetParams as WidgetParams).getVariableValues());
+      var temp = this.userInputData;
+      temp = JSON.parse(JSON.stringify(temp));
+      temp = this.strMapObjChange.objToStrMap(temp);
+      this.userInputData = temp;
+      console.log(this.userInputData);
+      console.log(payload.variables);
+      this.userInputData.forEach((value , key) =>{
+        payload.variables.forEach((valueofpayload,keyofpayload)=>{
+        if(key == keyofpayload)
+        {
+          this.userInputData.set(key,payload.variables.get(keyofpayload) as string);
+        }
+      });
+    });
+     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
+    //  this.updateUI();
+  }
 
   refresh() {
     var Args: UpdatePayload = {

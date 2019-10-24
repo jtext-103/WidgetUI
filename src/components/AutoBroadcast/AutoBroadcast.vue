@@ -49,6 +49,16 @@
     </b-row>
 
     <br />
+
+    <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="BroadcastName" v-show="isShowPath">
+         <b-form-input v-model="autoUpdateName" ></b-form-input>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <br />
     <b-row>
       <b-col>
         <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
@@ -59,6 +69,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import PubSub from 'pubsub-js';
 import { VueSvgGauge } from "vue-svg-gauge";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
@@ -80,10 +91,10 @@ import Navigation from "@/components/Common/Navigation.vue";
     Navigation
   }
 })
-export default class Status extends Widget {
+export default class AutoBroadcast extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
-  WidgetComponentName: string = "Status";
+  WidgetComponentName: string = "AutoBroadcast";
   StatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
@@ -91,9 +102,10 @@ export default class Status extends Widget {
   timer?: number;
   isShowPath: boolean = false;
   isShowParams: boolean = false;
+  autoUpdateName: string = "";
 
   config: WidgetConfig = {
-    WidgetComponentName: "Status",
+    WidgetComponentName: "AutoBroadcast",
     data: {
       url: "",
       userInputData: ""
@@ -220,7 +232,7 @@ export default class Status extends Widget {
         }
       });
   }
-
+  
   //called when widgetParams action clicked
   async viewLoad(Args: UpdatePayload) {
     // this.config.data.userInputData = Args.variables;
@@ -231,6 +243,18 @@ export default class Status extends Widget {
       this.config.data.url
     );
     await this.getData(this.pathwithVar);
+
+    if(this.autoUpdateName != "")
+    {
+        var autoUpdateData= new Map<string, string>();
+        autoUpdateData.set(this.autoUpdateName,this.StatusValue);
+        var autoUpdate:UpdatePayload = {
+          action: "AutoBroadcast",
+          variables: autoUpdateData,
+          target:['self']
+        }
+        PubSub.publish('VarBroadcast',autoUpdate);
+    }
   }
 }
 </script>
