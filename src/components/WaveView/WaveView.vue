@@ -76,7 +76,34 @@ export default class waveView extends Widget {
         (this.$refs.setBasicParams as setBasicParams).setConfig(widgetConfig);
     }
     parentUpdate(payload: UpdatePayload): void {
-
+        this.userInputData = this.strMapObjChange.strMapToObj(
+            ((this.$refs.setBasicParams as setBasicParams).getVariableValues())
+        );
+        var temp = this.userInputData;
+        var flag = 0;
+        temp = this.strMapObjChange.objToStrMap(temp);
+        this.userInputData = temp;
+        console.log(this.userInputData);
+        console.log(payload.variables);
+        this.userInputData.forEach((value, key) => {
+            console.log("进来了");
+            console.log(key);
+            payload.variables.forEach((valueofpayload, keyofpayload) => {
+                console.log(key);
+                console.log(keyofpayload);
+                if(key == keyofpayload){
+                    if(value != keyofpayload){
+                        flag = 1;
+                        this.userInputData.set(key,payload.variables.get(keyofpayload) as string);
+                    }
+                }
+            })
+        });
+        if(flag == 1){
+            (this.$refs.setBasicParams as setBasicParams).setVariableInput(this.userInputData);
+            this.updateUI();
+            this.refresh();
+        }
     }
     showPathIdConfig(){
         (this.$refs.setBasicParams as setBasicParams).showPathIdConfig();

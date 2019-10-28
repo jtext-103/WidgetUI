@@ -2,7 +2,9 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="smallFont">Path: {{ config.data.get.url }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname == ''">{{ config.data.get.url }}</span>
+        <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
@@ -127,6 +129,7 @@ export default class Config extends Widget {
   config: WidgetConfig = {
     WidgetComponentName: "Status",
     data: {
+      displayname:"",
       get: { url: "", userInputData: "" },
       set: { url: "", userInputData: "" }
     }
@@ -293,37 +296,42 @@ export default class Config extends Widget {
   }
 
   parentUpdate(payload: UpdatePayload): void {
+    var shouldUpdate:boolean = false;
     this.userGetInputData = this.strMapObjChange.strMapToObj(
        (this.$refs.WidgetGetParams as WidgetParams).getVariableValues());
       var temp = this.userGetInputData;
-      temp = JSON.parse(JSON.stringify(temp));
       temp = this.strMapObjChange.objToStrMap(temp);
       this.userGetInputData = temp;
       this.userGetInputData.forEach((value , key) =>{
         payload.variables.forEach((valueofpayload,keyofpayload)=>{
-        if(key == keyofpayload)
+        if(key == keyofpayload  && ((this.userGetInputData.get(key) as string) != (payload.variables.get(keyofpayload) as string)))
         {
           this.userGetInputData.set(key,payload.variables.get(keyofpayload) as string);
+          shouldUpdate = true;
         }
       });
     });
-    (this.$refs.WidgetGetParams as WidgetParams).setVariableInput(this.userGetInputData);
 
     this.userSetInputData = this.strMapObjChange.strMapToObj(
        (this.$refs.WidgetSetParams as WidgetParams).getVariableValues());
       temp = this.userSetInputData;
-      temp = JSON.parse(JSON.stringify(temp));
       temp = this.strMapObjChange.objToStrMap(temp);
       this.userSetInputData = temp;
       this.userSetInputData.forEach((value , key) =>{
-        payload.variables.forEach((valueofpayload,keyofpayload)=>{
-        if(key == keyofpayload)
+      payload.variables.forEach((valueofpayload,keyofpayload)=>{
+      if(key == keyofpayload  && ((this.userSetInputData.get(key) as string) != (payload.variables.get(keyofpayload) as string)))
         {
           this.userSetInputData.set(key,payload.variables.get(keyofpayload) as string);
         }
       });
     });
-    (this.$refs.WidgetSetParams as WidgetParams).setVariableInput(this.userSetInputData);
+    
+     if(shouldUpdate)
+     {
+        (this.$refs.WidgetGetParams as WidgetParams).setVariableInput(this.userGetInputData);
+        (this.$refs.WidgetSetParams as WidgetParams).setVariableInput(this.userSetInputData);
+        this.updateUI();
+     }
   }
 
   refresh() {

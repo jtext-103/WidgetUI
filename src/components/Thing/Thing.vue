@@ -2,7 +2,9 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="smallFont">path: {{ config.data.url }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
+        <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
@@ -96,6 +98,7 @@ export default class Thing extends Widget {
     WidgetComponentName: "Thing",
     data: {
       url: "",
+      displayname:"",
       userInputData: ""
     }
   };

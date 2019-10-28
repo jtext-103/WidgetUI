@@ -2,7 +2,9 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="smallFont">path: {{ config.data.url }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
+        <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
@@ -92,10 +94,12 @@ export default class Status extends Widget {
   isShowPath: boolean = false;
   isShowParams: boolean = false;
 
+
   config: WidgetConfig = {
     WidgetComponentName: "Status",
     data: {
       url: "",
+      displayname:"",
       userInputData: ""
     }
   };
@@ -193,24 +197,27 @@ export default class Status extends Widget {
   }
 
   parentUpdate(payload: UpdatePayload): void {
+    var shouldUpdate:boolean = false
     this.userInputData = this.strMapObjChange.strMapToObj(
       (this.$refs.WidgetParams as WidgetParams).getVariableValues());
       var temp = this.userInputData;
-      temp = JSON.parse(JSON.stringify(temp));
       temp = this.strMapObjChange.objToStrMap(temp);
       this.userInputData = temp;
-      console.log(this.userInputData);
-      console.log(payload.variables);
       this.userInputData.forEach((value , key) =>{
         payload.variables.forEach((valueofpayload,keyofpayload)=>{
-        if(key == keyofpayload)
+        if(key == keyofpayload && ((this.userInputData.get(key) as string) != (payload.variables.get(keyofpayload) as string)))
         {
           this.userInputData.set(key,payload.variables.get(keyofpayload) as string);
+          shouldUpdate = true;
         }
       });
     });
-     (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
-    //  this.updateUI();
+
+     if(shouldUpdate)
+     {
+        (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
+        this.updateUI();
+     }
   }
 
   refresh() {

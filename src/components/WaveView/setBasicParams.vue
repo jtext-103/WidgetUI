@@ -76,6 +76,14 @@ export default class setBasicParams extends Vue {
     };
     this.viewLoad(Args);
   }
+
+  getVariableValues(): Map<string, string>{
+    return (this.$refs.WidgetParams as WidgetParams).getVariableValues();
+  }
+  
+  setVariableInput(parentUserInputData: Map<string, string>) {
+    (this.$refs.WidgetParams as WidgetParams).setVariableInput(parentUserInputData);
+  }
   pathPoke(){
     this.$emit("pathPoke");
   }

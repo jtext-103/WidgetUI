@@ -2,7 +2,9 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" class="smallFont">path: {{ config.data.url }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
+        <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
@@ -58,6 +60,17 @@
       </b-col>
     </b-row>
 
+     <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="BroadcastValue" v-show="isShowPath">
+          <b-form-input v-model="autoUpdateValue"></b-form-input>
+          <b-input-group-append>
+            <b-button @click="broadcast" text="Button" variant="primary">Broadcast</b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
     <br />
     <b-row>
       <b-col>
@@ -96,6 +109,7 @@ export default class AutoBroadcast extends Widget {
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "AutoBroadcast";
   StatusValue: string = "";
+  preStatusValue: string = "";
   pathId: string = "";
   userInputData = new Map<string, string>();
   pathwithVar: string = "";
@@ -103,11 +117,13 @@ export default class AutoBroadcast extends Widget {
   isShowPath: boolean = false;
   isShowParams: boolean = false;
   autoUpdateName: string = "";
+  autoUpdateValue: string ="";
 
   config: WidgetConfig = {
     WidgetComponentName: "AutoBroadcast",
     data: {
       url: "",
+      displayname:"",
       userInputData: ""
     }
   };
@@ -233,6 +249,23 @@ export default class AutoBroadcast extends Widget {
       });
   }
   
+  broadcast()
+  {
+    if(this.autoUpdateName != "" && this.autoUpdateValue != "")
+    {
+        var autoUpdateData= new Map<string, string>();
+        autoUpdateData.set(this.autoUpdateName,this.autoUpdateValue);
+        var autoUpdate:UpdatePayload = {
+          action: "AutoBroadcast",
+          variables: autoUpdateData,
+          target:['self']
+        }
+        PubSub.publish('VarBroadcast',autoUpdate);
+        this.preStatusValue = this.autoUpdateValue;
+    }
+  }
+
+
   //called when widgetParams action clicked
   async viewLoad(Args: UpdatePayload) {
     // this.config.data.userInputData = Args.variables;
@@ -244,7 +277,7 @@ export default class AutoBroadcast extends Widget {
     );
     await this.getData(this.pathwithVar);
 
-    if(this.autoUpdateName != "")
+    if(this.autoUpdateName != "" && this.preStatusValue != this.StatusValue)
     {
         var autoUpdateData= new Map<string, string>();
         autoUpdateData.set(this.autoUpdateName,this.StatusValue);
@@ -254,6 +287,7 @@ export default class AutoBroadcast extends Widget {
           target:['self']
         }
         PubSub.publish('VarBroadcast',autoUpdate);
+        this.preStatusValue = this.StatusValue;
     }
   }
 }
