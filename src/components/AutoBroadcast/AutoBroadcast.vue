@@ -2,8 +2,8 @@
   <b-container class="bv-example-row">
     <b-row style="margin-top:10px">
       <b-col>
-        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
-        <span style="float:left;" v-show = "!isShowPath" class="smallFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="largeFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
+        <span style="float:left;" v-show = "!isShowPath" class="largeFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
         <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
@@ -60,6 +60,8 @@
       </b-col>
     </b-row>
 
+    <br />
+
      <b-row>
       <b-col>
         <b-input-group size="lg" prepend="BroadcastValue" v-show="isShowPath">
@@ -67,6 +69,16 @@
           <b-input-group-append>
             <b-button @click="broadcast" text="Button" variant="primary">Broadcast</b-button>
           </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <br />
+
+    <b-row>
+      <b-col>
+        <b-input-group size="lg" prepend="DelayTime" v-show="isShowPath" append="ms">
+         <b-form-input v-model="delayTime" ></b-form-input>
         </b-input-group>
       </b-col>
     </b-row>
@@ -118,6 +130,7 @@ export default class AutoBroadcast extends Widget {
   isShowParams: boolean = false;
   autoUpdateName: string = "";
   autoUpdateValue: string ="";
+  delayTime:number = 0;
 
   config: WidgetConfig = {
     WidgetComponentName: "AutoBroadcast",
@@ -260,8 +273,10 @@ export default class AutoBroadcast extends Widget {
           variables: autoUpdateData,
           target:['self']
         }
+
         PubSub.publish('VarBroadcast',autoUpdate);
         this.preStatusValue = this.autoUpdateValue;
+
     }
   }
 
@@ -286,8 +301,10 @@ export default class AutoBroadcast extends Widget {
           variables: autoUpdateData,
           target:['self']
         }
-        PubSub.publish('VarBroadcast',autoUpdate);
-        this.preStatusValue = this.StatusValue;
+        setTimeout(() => {
+          PubSub.publish('VarBroadcast',autoUpdate);
+          this.preStatusValue = this.autoUpdateValue;
+        }, this.delayTime);
     }
   }
 }
