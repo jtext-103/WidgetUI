@@ -84,6 +84,7 @@ import Thing from "./components/Thing/Thing.vue";
 import State from "./components/State/State.vue";
 import VarBroadcast from "./components/VarBroadcast/VarBroadcast.vue";
 import AutoBroadcast from "./components/AutoBroadcast/AutoBroadcast.vue";
+import SlideShow from "./components/SlideShow/SlideShow.vue";
 // import Gauge from "./components/Gauge/Gauge.vue";
 
 //this is the view selecotr class
@@ -99,7 +100,8 @@ import AutoBroadcast from "./components/AutoBroadcast/AutoBroadcast.vue";
     GridItem,
     State,
     VarBroadcast,
-    AutoBroadcast
+    AutoBroadcast,
+    SlideShow
   }
 })
 export default class App extends Vue {
@@ -118,7 +120,8 @@ export default class App extends Vue {
     "Thing",
     "State",
     "VarBroadcast",
-    "AutoBroadcast"
+    "AutoBroadcast",
+    "SlideShow"
   ];
 
   toggleShowAddWidget(): void {
