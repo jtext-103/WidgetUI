@@ -85,6 +85,7 @@ import State from "./components/State/State.vue";
 import VarBroadcast from "./components/VarBroadcast/VarBroadcast.vue";
 import AutoBroadcast from "./components/AutoBroadcast/AutoBroadcast.vue";
 import SlideShow from "./components/SlideShow/SlideShow.vue";
+import CardReader from "./components/CardReader/CardReader.vue";
 // import Gauge from "./components/Gauge/Gauge.vue";
 
 //this is the view selecotr class
@@ -101,7 +102,8 @@ import SlideShow from "./components/SlideShow/SlideShow.vue";
     State,
     VarBroadcast,
     AutoBroadcast,
-    SlideShow
+    SlideShow,
+    CardReader
   }
 })
 export default class App extends Vue {
@@ -121,8 +123,10 @@ export default class App extends Vue {
     "State",
     "VarBroadcast",
     "AutoBroadcast",
-    "SlideShow"
+    "SlideShow",
+    "CardReader"
   ];
+  
 
   toggleShowAddWidget(): void {
     this.isShowAddWidget = !this.isShowAddWidget;
@@ -216,7 +220,7 @@ export default class App extends Vue {
         });
     }
 
-    PubSub.subscribe("VarBroadcast",(messageName, Args)=>{
+    PubSub.subscribe("VarBroadcast",(messageName:string, Args:any)=>{
       //接收到消息调用全部widget的parentUpdate函数
       for (var widget of this.widgetList) {
       ((this.$refs[widget.ref] as Array<Widget>)[0] as Widget).parentUpdate(Args);}

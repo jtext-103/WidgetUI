@@ -15,12 +15,10 @@
 
     <br />
 
-    <b-row>
+    <b-row v-for="(info,index) in StatusValue" :key="index">
       <b-col>
-        <div
-          style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
-        >
-          <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
+        <div style="width:100%;overflow:auto;border-style: solid; border-width: 1px;">
+          <p style="float:left;margin:0px" class="largeFont">{{ info }}</p>
         </div>
       </b-col>
     </b-row>
@@ -51,39 +49,6 @@
     </b-row>
 
     <br />
-
-    <b-row>
-      <b-col>
-        <b-input-group size="lg" prepend="BroadcastName" v-show="isShowPath">
-         <b-form-input v-model="config.data.autoUpdateName" ></b-form-input>
-        </b-input-group>
-      </b-col>
-    </b-row>
-
-    <br />
-
-     <b-row>
-      <b-col>
-        <b-input-group size="lg" prepend="BroadcastValue" v-show="isShowPath">
-          <b-form-input v-model="config.data.autoUpdateValue"></b-form-input>
-          <b-input-group-append>
-            <b-button @click="broadcast" text="Button" variant="primary">Broadcast</b-button>
-          </b-input-group-append>
-        </b-input-group>
-      </b-col>
-    </b-row>
-
-    <br />
-
-    <b-row>
-      <b-col>
-        <b-input-group size="lg" prepend="DelayTime" v-show="isShowPath" append="ms">
-         <b-form-input v-model="config.data.delayTime" ></b-form-input>
-        </b-input-group>
-      </b-col>
-    </b-row>
-
-    <br />
     <b-row>
       <b-col>
         <Navigation ref="FamilyLink" :url="config.data.url"></Navigation>
@@ -94,7 +59,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import PubSub from 'pubsub-js';
 import { VueSvgGauge } from "vue-svg-gauge";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
@@ -116,12 +80,11 @@ import Navigation from "@/components/Common/Navigation.vue";
     Navigation
   }
 })
-export default class AutoBroadcast extends Widget {
+export default class CardReader extends Widget {
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
-  WidgetComponentName: string = "AutoBroadcast";
-  StatusValue: string = "";
-  preStatusValue: string = "";
+  WidgetComponentName: string = "CardReader";
+  StatusValue: string[] =[];     
   pathId: string = "";
   userInputData = new Map<string, string>();
   pathwithVar: string = "";
@@ -129,15 +92,13 @@ export default class AutoBroadcast extends Widget {
   isShowPath: boolean = false;
   isShowParams: boolean = false;
 
+
   config: WidgetConfig = {
-    WidgetComponentName: "AutoBroadcast",
+    WidgetComponentName: "CardReader",
     data: {
       url: "",
       displayname:"",
-      userInputData: "",
-      autoUpdateName:"",
-      autoUpdateValue:"",
-      delayTime:""
+      userInputData: ""
     }
   };
 
@@ -233,7 +194,29 @@ export default class AutoBroadcast extends Widget {
     this.config.data.url.replace("$startPath$", startPath);
   }
 
-  parentUpdate(payload: UpdatePayload): void {}
+  parentUpdate(payload: UpdatePayload): void {
+    var shouldUpdate:boolean = false
+    this.userInputData = this.strMapObjChange.strMapToObj(
+      (this.$refs.WidgetParams as WidgetParams).getVariableValues());
+      var temp = this.userInputData;
+      temp = this.strMapObjChange.objToStrMap(temp);
+      this.userInputData = temp;
+      this.userInputData.forEach((value , key) =>{
+        payload.variables.forEach((valueofpayload,keyofpayload)=>{
+        if(key == keyofpayload && ((this.userInputData.get(key) as string) != (payload.variables.get(keyofpayload) as string)))
+        {
+          this.userInputData.set(key,payload.variables.get(keyofpayload) as string);
+          shouldUpdate = true;
+        }
+      });
+    });
+
+     if(shouldUpdate)
+     {
+        (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
+        this.updateUI();
+     }
+  }
 
   refresh() {
     var Args: UpdatePayload = {
@@ -257,29 +240,10 @@ export default class AutoBroadcast extends Widget {
         this.StatusValue = response.data.CFET2CORE_SAMPLE_VAL;
         if(this.StatusValue == undefined)
         {
-            this.StatusValue = "undefined";
+            this.StatusValue = ["undefined"];
         }
       });
   }
-  
-  broadcast()
-  {
-    if(this.config.data.autoUpdateName != "" && this.config.data.autoUpdateValue != "")
-    {
-        var autoUpdateData= new Map<string, string>();
-        autoUpdateData.set(this.config.data.autoUpdateName,this.config.data.autoUpdateValue);
-        var autoUpdate:UpdatePayload = {
-          action: "AutoBroadcast",
-          variables: autoUpdateData,
-          target:['self']
-        }
-
-        PubSub.publish('VarBroadcast',autoUpdate);
-        this.preStatusValue = this.config.data.autoUpdateValue;
-
-    }
-  }
-
 
   //called when widgetParams action clicked
   async viewLoad(Args: UpdatePayload) {
@@ -291,21 +255,6 @@ export default class AutoBroadcast extends Widget {
       this.config.data.url
     );
     await this.getData(this.pathwithVar);
-
-    if(this.config.data.autoUpdateName != "" && this.preStatusValue != this.StatusValue)
-    {
-        var autoUpdateData= new Map<string, string>();
-        autoUpdateData.set(this.config.data.autoUpdateName,this.StatusValue);
-        var autoUpdate:UpdatePayload = {
-          action: "AutoBroadcast",
-          variables: autoUpdateData,
-          target:['self']
-        }
-        setTimeout(() => {
-          PubSub.publish('VarBroadcast',autoUpdate);
-          this.preStatusValue = this.config.data.autoUpdateValue;
-        }, this.config.data.delayTime);
-    }
   }
 }
 </script>
