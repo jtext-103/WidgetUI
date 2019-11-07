@@ -276,6 +276,8 @@ export default class AutoBroadcast extends Widget {
 
         PubSub.publish('VarBroadcast',autoUpdate);
         this.preStatusValue = this.config.data.autoUpdateValue;
+        console.log("preStatusValue"+this.preStatusValue);
+        console.log("autoUpdateValue"+this.config.data.autoUpdateValue);
 
     }
   }
@@ -294,6 +296,9 @@ export default class AutoBroadcast extends Widget {
 
     if(this.config.data.autoUpdateName != "" && this.preStatusValue != this.StatusValue)
     {
+        console.log("before autobroadcast");
+        console.log("preStatusValue"+this.preStatusValue);
+        console.log("StatusValue"+this.StatusValue);
         var autoUpdateData= new Map<string, string>();
         autoUpdateData.set(this.config.data.autoUpdateName,this.StatusValue);
         var autoUpdate:UpdatePayload = {
@@ -301,9 +306,9 @@ export default class AutoBroadcast extends Widget {
           variables: autoUpdateData,
           target:['self']
         }
+        this.preStatusValue = this.StatusValue;
         setTimeout(() => {
           PubSub.publish('VarBroadcast',autoUpdate);
-          this.preStatusValue = this.config.data.autoUpdateValue;
         }, this.config.data.delayTime);
     }
   }

@@ -48,8 +48,6 @@ export default class WidgetParams extends Vue{
 
     getVariableValues(): Map<string, string> {
         for(var key of this.userInputData.keys()) {
-            console.log("getVariableValues");
-            console.log(this.userInputData);
             this.userInputData.set(key, this.tempUserInputData[key]);
         }
         return this.userInputData;
@@ -60,8 +58,6 @@ export default class WidgetParams extends Vue{
             variables: this.getVariableValues(),
             target:['self']
         }
-        console.log("update");
-        console.log(Args.variables);
         this.$emit('updataVariables', Args)
     }
 }

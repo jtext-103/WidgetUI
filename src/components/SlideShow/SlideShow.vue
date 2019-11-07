@@ -277,6 +277,7 @@ export default class SlideShow extends Widget {
 
      if(shouldUpdate)
      {
+        console.log("I have updated"+this.userInputData);
         (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
         this.updateUI();
         this.refresh();
@@ -314,7 +315,8 @@ export default class SlideShow extends Widget {
       })
       .then(response => {
         this.img = response.data.CFET2CORE_SAMPLE_VAL;
-        if(this.img.length>0)
+        console.log("按了get后此时的值"+this.img)
+        if(this.img.length > 0)
         {
           this.currentImgIndex = 0;
         }
@@ -330,6 +332,7 @@ export default class SlideShow extends Widget {
       this.userInputData,
       this.config.data.url
     );
+    console.log("按了get后此时的url"+this.pathwithVar)
     await this.getData(this.pathwithVar);
   }
 }
