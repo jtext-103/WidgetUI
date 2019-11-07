@@ -21,6 +21,7 @@
           <b-form-input v-model="config.data.url"></b-form-input>
           <b-input-group-append>
             <b-button @click="updateUI" text="Button" variant="primary">OK</b-button>
+            <b-button variant="info" @click="pathPoke">poke</b-button>
           </b-input-group-append>
         </b-input-group>
       </b-col>
@@ -105,7 +106,7 @@ export default class SlideShow extends Widget {
   userInputData = new Map<string, string>();
   pathwithVar: string = "";
   timer?: number;
-  isShowPath: boolean = false;
+  isShowPath: boolean = false;     
   isShowParams: boolean = false;
   currentImgIndex: number = -1;
   img:string[] = new Array<string>();
@@ -129,10 +130,12 @@ export default class SlideShow extends Widget {
 
   mounted() {
     this.timer = setInterval(this.showSlide, 100);
+    console.log("this.timermounted"+this.timer);
   }
 
   destroyed() {
     clearInterval(this.timer);
+    console.log(this.timer);
   }
 
   turnLastImg()
@@ -164,12 +167,17 @@ export default class SlideShow extends Widget {
   {
      clearInterval(this.timer);
      this.isPause = true;
+     console.log("pause"+this.currentImgIndex);
+     console.log("this.timerdestroy"+this.timer);
   }
 
   playImg()
   {
+     clearInterval(this.timer);
+     console.log("this.timerplaydestroy"+this.timer);
      this.timer = setInterval(this.showSlide, 100);
      this.isPause = false;
+     console.log("this.timerplay"+this.timer);
   }
 
   updateUI() {
@@ -271,6 +279,7 @@ export default class SlideShow extends Widget {
      {
         (this.$refs.WidgetParams as WidgetParams).setVariableInput(this.userInputData);
         this.updateUI();
+        this.refresh();
      }
   }
 
@@ -282,6 +291,7 @@ export default class SlideShow extends Widget {
       varTemp = this.currentImgIndex;
       varTemp++;
       this.currentImgIndex = varTemp % this.img.length;
+      console.log(this.currentImgIndex);
     }
   }
   refresh() {
