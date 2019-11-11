@@ -11,7 +11,7 @@
         </b-dropdown-item>
       </b-dropdown>
       <b-button
-        class="smallFont"
+        class="largeFont"
         @click="saveWidgetList"
         style="margin-left:2%"
         variant="primary"
