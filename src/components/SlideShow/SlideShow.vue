@@ -1,11 +1,18 @@
 <template>
   <b-container class="bv-example-row">
+
     <b-row style="margin-top:10px">
       <b-col>
         <span style="float:left;" size="lg" v-show = "!isShowPath" class="largeFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
         <span style="float:left;" size="lg" v-show = "!isShowPath" class="largeFont" v-if = "config.data.displayname == ''">{{ config.data.url }}</span>
         <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
+      <b-col>
+        <b-button style="float:right" @click="del" text="Button" variant="outline-primary"><span class="glyphicon glyphicon-remove"></span></b-button>
+      </b-col>
+    </b-row>
+
+    <b-row style="margin-top:10px">
       <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
           <span class="glyphicon glyphicon-cog"></span>
@@ -76,12 +83,14 @@
 
 <script lang="ts">
 import Vue from "vue";
+import PubSub from 'pubsub-js';
 import { VueSvgGauge } from "vue-svg-gauge";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import { WidgetConfig } from "@/models/WidgetConfig";
 import { UpdatePayload } from "@/models/UpdatePayload";
 import { Widget } from "@/models/widget";
+import { WidgetRef } from "@/models/WidgetRef";
 import { ResourceInfo } from "@/models/Customview";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import axios from "axios";
@@ -98,6 +107,8 @@ import Navigation from "@/components/Common/Navigation.vue";
   }
 })
 export default class SlideShow extends Widget {
+  @Prop() index!:number;
+  @Prop() widgetList:WidgetRef[] = [];
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "SlideShow";
@@ -136,6 +147,12 @@ export default class SlideShow extends Widget {
   destroyed() {
     clearInterval(this.timer);
     console.log(this.timer);
+  }
+
+  del()
+  {
+      this.$emit('del', this.index);
+      console.log("del"+this.index);
   }
 
   turnLastImg()

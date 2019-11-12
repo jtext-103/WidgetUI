@@ -1,5 +1,6 @@
 <template>
   <b-container class="bv-example-row">
+
     <b-row style="margin-top:10px">
       <b-col>
         <span style="float:left;" v-show = "!isShowPath" class="largeFont" v-if = "config.data.displayname != ''">{{ config.data.displayname }}</span>
@@ -7,23 +8,17 @@
         <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
+        <b-button style="float:right" @click="del" text="Button" variant="outline-primary"><span class="glyphicon glyphicon-remove"></span></b-button>
+      </b-col>
+    </b-row>
+
+    <b-row style="margin-top:10px">
+      <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
           <span class="glyphicon glyphicon-cog"></span>
         </b-button>
       </b-col>
     </b-row>
-
-    <br />
-
-    <!-- <b-row>
-      <b-col>
-        <div
-          style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
-        >
-          <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
-        </div>
-      </b-col>
-    </b-row> -->
 
     <br />
 
@@ -68,6 +63,7 @@ import { WidgetConfig } from "@/models/WidgetConfig";
 import { UpdatePayload } from "@/models/UpdatePayload";
 import { Widget } from "@/models/widget";
 import { ResourceInfo } from "@/models/Customview";
+import { WidgetRef } from "@/models/WidgetRef";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
 import axios from "axios";
 import PathProcessor from "@/models/PathProcessor";
@@ -83,6 +79,8 @@ import Navigation from "@/components/Common/Navigation.vue";
   }
 })
 export default class Thing extends Widget {
+  @Prop() index!:number;
+  @Prop() widgetList:WidgetRef[] = [];
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Thing";
@@ -110,13 +108,11 @@ export default class Thing extends Widget {
     );
   }
 
-  // mounted() {
-  //   this.timer = setInterval(this.refresh, 1000);
-  // }
-
-  // destroyed() {
-  //   clearInterval(this.timer);
-  // }
+  del()
+  {
+      this.$emit('del', this.index);
+      console.log("del"+this.index);
+  }
 
   updateUI() {
     this.isShowPath = false;

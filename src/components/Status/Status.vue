@@ -7,6 +7,12 @@
         <b-form-input v-show="isShowPath" v-model="config.data.displayname"></b-form-input>
       </b-col>
       <b-col>
+        <b-button style="float:right" @click="del" text="Button" variant="outline-primary"><span class="glyphicon glyphicon-remove"></span></b-button>
+      </b-col>
+    </b-row>
+
+    <b-row style="margin-top:10px">
+      <b-col>
         <b-button @click="showPathConfig" variant="primary" style="float:right">
           <span class="glyphicon glyphicon-cog"></span>
         </b-button>
@@ -69,6 +75,7 @@ import { UpdatePayload } from "@/models/UpdatePayload";
 import { Widget } from "@/models/widget";
 import { ResourceInfo } from "@/models/Customview";
 import WidgetParams from "@/components/Common/WidgetParams.vue";
+import { WidgetRef } from "@/models/WidgetRef";
 import axios from "axios";
 import PathProcessor from "@/models/PathProcessor";
 import StrMapObjChange from "@/models/StrMapObjChange";
@@ -83,6 +90,8 @@ import Navigation from "@/components/Common/Navigation.vue";
   }
 })
 export default class Status extends Widget {
+  @Prop() index!:number;
+  @Prop() widgetList:WidgetRef[] = [];
   pathProcessor = new PathProcessor();
   strMapObjChange = new StrMapObjChange();
   WidgetComponentName: string = "Status";
@@ -116,6 +125,12 @@ export default class Status extends Widget {
 
   destroyed() {
     clearInterval(this.timer);
+  }
+
+  del()
+  {
+      this.$emit('del', this.index);
+      console.log("del"+this.index);
   }
 
   updateUI() {

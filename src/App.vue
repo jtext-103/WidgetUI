@@ -39,9 +39,10 @@
       :vertical-compact="true"
       :margin="[10, 10]"
       :use-css-transforms="true"
+      :responsive="true"
     >
       <grid-item
-        v-for="(widget) in widgetList"
+        v-for="(widget,index) in widgetList"
         :x="widget.x"
         :y="widget.y"
         :w="widget.w"
@@ -53,7 +54,7 @@
       >
         <div style="border-color: rgb(206, 212, 218);">
           <div class="vue-draggable-handle" style="height:20px;background-color:rgb(0, 123, 255)"></div>
-          <component class="no-drag" :is="widget.widgetComponentName" :ref="widget.ref"></component>
+          <component class="no-drag" :is="widget.widgetComponentName" :ref="widget.ref"  :index="index" :widgetList="widgetList" @del="deleteWidget"></component>
         </div>
       </grid-item>
     </grid-layout>
@@ -126,6 +127,12 @@ export default class App extends Vue {
     "SlideShow",
     "CardReader"
   ];
+
+  deleteWidget(index:number):void{
+     console.log("deleteWidget"+index);
+      this.widgetList.splice(index, 1);
+     console.log(this.widgetList);
+  }
   
 
   toggleShowAddWidget(): void {
@@ -225,7 +232,7 @@ export default class App extends Vue {
       for (var widget of this.widgetList) {
       ((this.$refs[widget.ref] as Array<Widget>)[0] as Widget).parentUpdate(Args);}
     });
-  }
+  }  
 
   exportActiveWidgetList(): AllWidgetConfig {
     for (var widget of this.widgetList) {

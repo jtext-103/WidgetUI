@@ -1,5 +1,9 @@
 <template>
 <div class="waveView">
+    <div style="margin-top:10px">
+    <b-button style="float:right" @click="del" text="Button" variant="outline-primary"><span class="glyphicon glyphicon-remove"></span></b-button>
+    </div>
+    <br/>
     <showViewInfo ref="showViewInfo" :pathId="pathId" @showPathIdConfig="showPathIdConfig"></showViewInfo>
     <div ref="wave">
     
@@ -19,6 +23,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { WidgetConfig } from '@/models/WidgetConfig';
 import { UpdatePayload } from '@/models/UpdatePayload';
 import { Widget } from '@/models/widget';
+import { WidgetRef } from "@/models/WidgetRef";
 import StrMapObjChange from "@/models/StrMapObjChange";
 import { ResourceInfo } from "@/models/Customview";
 import axios from "axios";
@@ -32,6 +37,8 @@ import axios from "axios";
     }
 })
 export default class waveView extends Widget {
+    @Prop() index!:number;
+    @Prop() widgetList:WidgetRef[] = [];
     WidgetComponentName: string = 'waveView';
     wave: any = '';
     pathId: string = '';
@@ -54,6 +61,12 @@ export default class waveView extends Widget {
             }
         }
     };
+
+    del()
+    {
+        this.$emit('del', this.index);
+        console.log("del"+this.index);
+    }
 
     getConfig(): WidgetConfig {
         (this.$refs.setBasicParams as setBasicParams).updateUserInputData();
