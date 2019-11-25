@@ -4,6 +4,7 @@ import '@/assets/css/fontSize.css';
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import BootstrapVue from 'bootstrap-vue'
+import 'babel-polyfill'
 import VueRouter from 'vue-router'
 
 

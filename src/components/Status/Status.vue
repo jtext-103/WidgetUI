@@ -26,7 +26,7 @@
         <div
           style="width:100%;overflow:auto;border-style: solid; border-width: 1px;"
         >
-          <p style="float:left;margin:0px" class="largeFont">{{ StatusValue }}</p>
+          <p style="float:left;margin:0px" class="valueFont">{{ StatusValue }}</p>
         </div>
       </b-col>
     </b-row>

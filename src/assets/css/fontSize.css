@@ -7,3 +7,9 @@
 .largeFont span{
     float: left;
 }
+.valueFont{
+    font-size: 100px;
+}
+.valueFont span{
+    float: left;
+}

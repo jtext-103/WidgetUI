@@ -61,6 +61,12 @@
       </b-col>
     </b-row>
 
+    <b-row>
+      <b-col>
+         <b-progress :value="currentImgIndex+1" :max="img.length" show-progress animated></b-progress>
+      </b-col>
+    </b-row>
+
      <b-row>
       <b-col>
         <b-button-toolbar key-nav class="mx-auto" style="width: 200px;">
@@ -121,7 +127,9 @@ export default class SlideShow extends Widget {
   isShowParams: boolean = false;
   currentImgIndex: number = -1;
   img:string[] = new Array<string>();
+  //img:string[] = ["https://picsum.photos/250/250/?image=54","https://picsum.photos/250/250/?image=58","https://picsum.photos/250/250/?image=59","https://picsum.photos/250/250/?image=54","https://picsum.photos/250/250/?image=58","https://picsum.photos/250/250/?image=59"]
   isPause: boolean = false;
+  pauseFlag: boolean = false;
 
 
   config: WidgetConfig = {
@@ -140,7 +148,7 @@ export default class SlideShow extends Widget {
   }
 
   mounted() {
-    this.timer = setInterval(this.showSlide, 100);
+    this.timer = setInterval(this.showSlide, 300);
     console.log("this.timermounted"+this.timer);
   }
 
@@ -192,7 +200,7 @@ export default class SlideShow extends Widget {
   {
      clearInterval(this.timer);
      console.log("this.timerplaydestroy"+this.timer);
-     this.timer = setInterval(this.showSlide, 100);
+     this.timer = setInterval(this.showSlide, 300);
      this.isPause = false;
      console.log("this.timerplay"+this.timer);
   }
@@ -301,6 +309,40 @@ export default class SlideShow extends Widget {
      }
   }
 
+  // showSlide()
+  // {
+  //   if(this.currentImgIndex != -1 )
+  //   {
+  //     var varTemp:number;
+  //     if(this.currentImgIndex != 0 && this.pauseFlag == false)
+  //     {
+  //       varTemp = this.currentImgIndex;
+  //       varTemp++;
+  //       this.currentImgIndex = varTemp % this.img.length;
+  //       console.log(this.currentImgIndex);
+  //     }
+  //     else if(this.currentImgIndex == 0 && this.pauseFlag == false){
+  //       this.currentImgIndex = -1;
+  //       this.pauseFlag = true;
+  //       console.log("start ");
+  //       setTimeout(() => {
+  //          this.currentImgIndex = 0;
+  //          console.log("delay end ");
+  //          console.log(this.currentImgIndex);
+  //       }, 3000);
+  //     }
+  //     else if(this.currentImgIndex == 0 && this.pauseFlag == true)
+  //     {
+  //        this.pauseFlag = false;
+  //         varTemp = this.currentImgIndex;
+  //         varTemp++;
+  //         this.currentImgIndex = varTemp % this.img.length;
+  //         console.log(this.currentImgIndex);
+  //     }
+  //   }
+  // }
+
+
   showSlide()
   {
     if(this.currentImgIndex != -1 )
@@ -312,6 +354,8 @@ export default class SlideShow extends Widget {
       console.log(this.currentImgIndex);
     }
   }
+
+
   refresh() {
     var Args: UpdatePayload = {
       action: "get",

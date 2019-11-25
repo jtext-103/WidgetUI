@@ -11,10 +11,10 @@
         </b-dropdown-item>
       </b-dropdown>
       <b-button
-        class="largeFont"
         @click="saveWidgetList"
         style="margin-left:2%"
         variant="primary"
+        size="lg"
       >Save</b-button>
       <b-form-file
         id="file"

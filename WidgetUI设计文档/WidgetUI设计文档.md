@@ -24,7 +24,7 @@ setConfig：根据Parent提供的数据填充自己的路径和输入框中的�
 ![poke流程图](2019-09-30-15-01-53.png)
 > samplePoke是根据sample中的参数信息将变量补充在URL后生成一个完整的URL。
 路径的来源有两种。
-  一个是Parent向widget提供sample，调用每个widget的samplePoke。
+  一个是Parent向widget提供sample，调用每个widget的samplePoke  。
   二对应pathPoke，是根据用户在输入框中输入的URL去向后台请求sample，然后自身调用自己的samplepoke从而对URL进行填充。
 
 除了基类里的一些共有性质，每个widget也有共有的2个组件。
