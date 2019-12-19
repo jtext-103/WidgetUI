@@ -1,10 +1,18 @@
 <template>
   <div>
     <div v-show="isShowCog" style="width:100%">
+      <b-button-group>
+        <b-button variant="success" @click="synchronizeRange(1)">SynchronizeX</b-button>
+        <b-button variant="info" @click="synchronizeRange(2)">SynchronizeY</b-button>
+        <b-button variant="warning" @click="synchronizeRange(3)">SynchronizeXY</b-button>
+      </b-button-group>
+      <br>
+      <br>
       <b-input-group size="lg" prepend="Channel Path">
         <b-input v-model="config.data.url.path" ></b-input>
         <b-button variant="info" @click="pathPoke">poke</b-button>
-      </b-input-group><br>
+      </b-input-group>
+      <br>
       <b-input-group size="lg" prepend="Channel TimePath">
         <b-input v-model="config.data.url.timePath" ></b-input>
         <b-input-group-addon>
@@ -161,6 +169,27 @@ export default class setBasicParams extends Vue {
     this.createChannelChart(myPlot, data_initial);
   }
 
+    synchronizeRange(kind:number)
+    {
+      console.log(kind);
+      var myplot = this.wave;
+      var xRange = myplot.layout.xaxis.range;
+      var yRange = myplot.layout.yaxis.range;
+      if(kind == 1)
+      {
+        PubSub.publish('SynchronizeX',{xrange:xRange,yrange:yRange});
+      }
+      else if(kind == 2)
+      {
+        PubSub.publish('SynchronizeY',{xrange:xRange,yrange:yRange});
+      }
+      else if(kind == 3)
+      {
+        PubSub.publish('SynchronizeXY',{xrange:xRange,yrange:yRange});
+      }
+      
+    }
+    
 
   async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
@@ -252,7 +281,32 @@ export default class setBasicParams extends Vue {
        Plotly.relayout(myPlot,layout_update);
     });
 
+    PubSub.subscribe('SynchronizeX',(messageName:string, Args:any)=>{
+        console.log("subscribe");
+        console.log(Args);
 
+        var layout_update = {
+              xaxis: {
+                range: Args.xrange
+              }
+        };
+      
+
+       Plotly.relayout(myPlot,layout_update);
+    });
+
+    PubSub.subscribe('SynchronizeY',(messageName:string, Args:any)=>{
+        console.log("subscribe");
+        console.log(Args);
+
+        var layout_update = {
+              yaxis: {
+                range: Args.yrange
+              }
+        };
+      
+       Plotly.relayout(myPlot,layout_update);
+    });
 
     myPlot.on("plotly_click", function(data:any) {
         //当前区域的范围
