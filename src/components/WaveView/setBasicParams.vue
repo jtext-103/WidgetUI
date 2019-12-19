@@ -21,6 +21,7 @@
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import axios from "axios";
 import Plotly from "plotly.js";
+import PubSub from 'pubsub-js';
 import global_ from '@/components/Common/global.vue';
 import { WidgetConfig } from "@/models/WidgetConfig";
 import { UpdatePayload } from "@/models/UpdatePayload";
@@ -159,6 +160,8 @@ export default class setBasicParams extends Vue {
     ];
     this.createChannelChart(myPlot, data_initial);
   }
+
+
   async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
     this.getConfig.data.position.x2 = "";
@@ -201,10 +204,82 @@ export default class setBasicParams extends Vue {
       },
       yaxis: {
         range: [this.config.data.position.y1, this.config.data.position.y2]
-      }
+      },
+      hovermode:'closest',
+      clickmode:'event'
     };
+    console.log(layout_initial);
     this.createChannelChart(myPlot, data_initial, layout_initial);
     this.updateConfig();
+
+
+    PubSub.subscribe('PlotlyClick',(messageName:string, Args:any)=>{
+        console.log("subscribe");
+        console.log(Args);
+
+        var annotate_text = 'x = '+Args.x +
+                        'y = '+Args.y;
+        var annotation = {
+            text: annotate_text,
+            x: Args.x,
+            y: Args.y
+          }
+        var annotations = [];
+          annotations.push(annotation);
+
+        var layout_update = {
+              annotations: annotations
+        };
+      
+
+       Plotly.relayout(myPlot,layout_update);
+    });
+
+     PubSub.subscribe('SynchronizeXY',(messageName:string, Args:any)=>{
+        console.log("subscribe");
+        console.log(Args);
+
+        var layout_update = {
+              xaxis: {
+                range: Args.xrange
+              },
+              yaxis: {
+                range: Args.yrange
+              }
+        };
+      
+
+       Plotly.relayout(myPlot,layout_update);
+    });
+
+
+
+    myPlot.on("plotly_click", function(data:any) {
+        //当前区域的范围
+        console.log(data.points[0].xaxis.range);
+        console.log(data.points[0].yaxis.range);
+        var pts = '';
+        for(var i=0; i < data.points.length; i++){
+          var annotate_text = 'x = '+data.points[i].x +
+                        'y = '+data.points[i].y.toPrecision(4);
+
+          var annotation = {
+            text: annotate_text,
+            x: data.points[i].x,
+            y: parseFloat(data.points[i].y.toPrecision(4))
+          }
+
+          var annotations = [];
+          annotations.push(annotation);
+
+          Plotly.relayout(myPlot,{annotations: annotations});
+
+          PubSub.publish('PlotlyClick',{x:data.points[i].x,y:data.points[i].y.toPrecision(4)});
+          PubSub.publish('SynchronizeXY',{xrange:data.points[0].xaxis.range,yrange:data.points[0].yaxis.range});
+      }
+    });
+
+
 
     var requiredDotNum = this.temp.dataTimeAxis.length;
     var reAskDataScale = 0.8;
@@ -222,9 +297,13 @@ export default class setBasicParams extends Vue {
     var config = this.config;
     var tempUserInputData = this.tempUserInputData;
 
+    console.log("a");
     zoom();
+    console.log("b");
     function zoom() {
+      console.log("c");
       myPlot.on("plotly_relayout", function(data: any) {
+        console.log("d");
         if (!data["xaxis.autorange"]) {
           var nowZoom_xmin = data["xaxis.range[0]"];
           var nowZoom_xmax = data["xaxis.range[1]"];
@@ -290,6 +369,8 @@ export default class setBasicParams extends Vue {
         zoom();
       });
     }
+
+
   }
   createChannelChart(myPlot: any, data_update: any, data_layout: any = {}) {
     data_layout.margin = { t: 20 };
