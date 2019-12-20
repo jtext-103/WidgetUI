@@ -190,7 +190,29 @@ export default class setBasicParams extends Vue {
       
     }
     
-
+  findNearest(array:number[],start:number,end:number,num:number):number
+  {
+    var midIndex:number = (start + end)/2;
+    midIndex = Number(midIndex.toFixed(0)) -1;
+    if(start>=end){return start}
+    var mid=array[midIndex];
+    var left=array[(midIndex-1)<start? start:(midIndex-1)];
+    var right=array[(midIndex+1)>end? end:(midIndex+1)];
+    var sm=Math.abs(num-mid);
+    var sl=Math.abs(num-left);
+    var sr=Math.abs(num-right);
+    if(sm < sl && sm < sr){
+            return midIndex;
+    }
+    else{
+            var li= this.findNearest(array,start,midIndex-1, num);
+            var ri= this.findNearest(array,midIndex+1, end, num);
+            if(Math.abs(num-array[li]) < Math.abs(num-array[ri])){
+                return li;
+            }
+            return ri;
+        }
+  }
   async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
     this.getConfig.data.position.x2 = "";
@@ -227,6 +249,8 @@ export default class setBasicParams extends Vue {
         y: this.temp.data
       }
     ];
+    console.log("data_initial:");
+    console.log(data_initial);
     var layout_initial = {
       xaxis: {
         range: [this.config.data.position.x1, this.config.data.position.x2]
@@ -235,7 +259,8 @@ export default class setBasicParams extends Vue {
         range: [this.config.data.position.y1, this.config.data.position.y2]
       },
       hovermode:'closest',
-      clickmode:'event'
+      clickmode:'event',
+      autosize:true
     };
     console.log(layout_initial);
     this.createChannelChart(myPlot, data_initial, layout_initial);
@@ -245,13 +270,16 @@ export default class setBasicParams extends Vue {
     PubSub.subscribe('PlotlyClick',(messageName:string, Args:any)=>{
         console.log("subscribe");
         console.log(Args);
+        var nearestIndex:number = this.findNearest(data_initial[0].x, 0 , data_initial[0].x.length-1, Args.x)
+        console.log(nearestIndex);
+        console.log(data_initial[0].x[nearestIndex]);
 
-        var annotate_text = 'x = '+Args.x +
-                        'y = '+Args.y;
+        var annotate_text = 'x = '+data_initial[0].x[nearestIndex] +
+                        'y = '+data_initial[0].y[nearestIndex];
         var annotation = {
             text: annotate_text,
-            x: Args.x,
-            y: Args.y
+            x: data_initial[0].x[nearestIndex],
+            y: data_initial[0].y[nearestIndex]
           }
         var annotations = [];
           annotations.push(annotation);
@@ -312,6 +340,7 @@ export default class setBasicParams extends Vue {
         //当前区域的范围
         console.log(data.points[0].xaxis.range);
         console.log(data.points[0].yaxis.range);
+        console.log(data);
         var pts = '';
         for(var i=0; i < data.points.length; i++){
           var annotate_text = 'x = '+data.points[i].x +
@@ -327,9 +356,7 @@ export default class setBasicParams extends Vue {
           annotations.push(annotation);
 
           Plotly.relayout(myPlot,{annotations: annotations});
-
           PubSub.publish('PlotlyClick',{x:data.points[i].x,y:data.points[i].y.toPrecision(4)});
-          PubSub.publish('SynchronizeXY',{xrange:data.points[0].xaxis.range,yrange:data.points[0].yaxis.range});
       }
     });
 

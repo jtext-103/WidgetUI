@@ -209,7 +209,7 @@ export default class App extends Vue {
               // fragment = fragment.substring(1,fragment.length);
               // for (var wid of this.widgetList) {
               //      ((this.$refs[wid.ref] as Array<Widget>)[0] as Widget).replaceStartPath( fragment as string);
-              //  }
+              //  }  
               //刷新值
               this.importActiveWidgetList();
               // for (var wid of this.widgetList) {
