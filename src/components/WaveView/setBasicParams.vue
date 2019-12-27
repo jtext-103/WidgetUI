@@ -72,6 +72,8 @@ export default class setBasicParams extends Vue {
   getConfig!: WidgetConfig;
   tempUrl: string = "";
   temp: any = {};
+  ExpectedDotNum:number = 1000;
+  ExpansionMultiple:number = 1;
 
   created() {
     this.config.data.userInputData = this.userInputData;
@@ -213,6 +215,8 @@ export default class setBasicParams extends Vue {
             return ri;
         }
   }
+
+
   async viewLoad(Args: UpdatePayload) {
     this.getConfig.data.position.x1 = "";
     this.getConfig.data.position.x2 = "";
@@ -220,14 +224,85 @@ export default class setBasicParams extends Vue {
     this.getConfig.data.position.y2 = "";
     this.config.data.userInputData = Args.variables;
     this.tempUserInputData = this.config.data.userInputData;
-    var url = this.pathProcessor.FillPathWithVar(
-      this.config.data.userInputData,
-      this.config.data.url.path
-    );
+    console.log("viewLoad");
+    var expectedDotNum = this.ExpectedDotNum;
+    var expansionMultiple = this.ExpansionMultiple;
+    
+    var initialStartTime:any = this.tempUserInputData.get("startTime");
+    var initialEndTime:any = this.tempUserInputData.get("endTime");
+    var initialRange:any = initialEndTime - initialStartTime;
+    
+    //获取边界值
+    var getLimitsInputData = this.tempUserInputData;
+    getLimitsInputData.set("startTime","0");
+    getLimitsInputData.set("endTime","0");
+    getLimitsInputData.set("count","2");
     var timeUrl = this.pathProcessor.FillPathWithVar(
-      this.config.data.userInputData,
+      getLimitsInputData,
       this.config.data.url.timePath
     );
+    console.log(timeUrl);
+    await this.getDataTimeAxis(timeUrl);
+    var xmin =  this.temp.dataTimeAxis[0];
+    var xmax =  this.temp.dataTimeAxis[1];
+    console.log("边界");
+    console.log(xmin);
+    console.log(xmax);
+
+    var expansionStartTime:any ;
+    var expansionEndTime:any;
+    var expansionDotNum:any
+
+    //向左右扩展范围获取数据
+    if(initialStartTime == 0 && initialEndTime == 0)
+    {
+      initialStartTime = xmin;
+      initialEndTime = xmax;
+      expansionStartTime = xmin;
+      expansionEndTime = xmax;
+      expansionDotNum = expectedDotNum;
+    }
+    else{
+      expansionStartTime= Number(initialStartTime)-expansionMultiple*initialRange>= xmin?Number(initialStartTime)-expansionMultiple*initialRange:xmin;
+      expansionEndTime= Number(initialEndTime)+expansionMultiple*initialRange <= xmax?Number(initialEndTime)+expansionMultiple*initialRange:xmax;
+      expansionDotNum =Math.floor(((Number(expansionEndTime)- Number(expansionStartTime)) / (Number(initialEndTime)- Number(initialStartTime)) )*expectedDotNum)+1;
+    }
+
+    var getInputData = this.tempUserInputData;
+    getInputData.set("startTime", expansionStartTime);
+    getInputData.set("endTime",expansionEndTime);
+    getInputData.set("count",expansionDotNum);
+    var url = this.pathProcessor.FillPathWithVar(
+      getInputData,
+      this.config.data.url.path
+    );
+    console.log(url);
+
+    await this.getData(url);
+
+    //当点不够时取全部点并重新获取y轴
+    if(this.temp.data == null)
+    {
+      getInputData.set("count","0");
+      url = this.pathProcessor.FillPathWithVar(
+      getInputData,
+      this.config.data.url.path
+      );
+      await this.getData(url);
+    }
+
+
+    var timeUrl = this.pathProcessor.FillPathWithVar(
+      getInputData,
+      this.config.data.url.timePath
+    );
+    console.log(url);
+    console.log(timeUrl);
+
+    await this.getDataTimeAxis(timeUrl);
+    
+
+
     var first = url.indexOf("/");
     var second = url.indexOf("/", first+1);
     var third = url.indexOf("/", second+1)
@@ -240,8 +315,8 @@ export default class setBasicParams extends Vue {
       path:path
     }
     this.$emit("getPathId", dealPath);
-    await this.getData(url);
-    await this.getDataTimeAxis(timeUrl);
+
+
     var myPlot = this.wave;
     var data_initial = [
       {
@@ -253,7 +328,7 @@ export default class setBasicParams extends Vue {
     console.log(data_initial);
     var layout_initial = {
       xaxis: {
-        range: [this.config.data.position.x1, this.config.data.position.x2]
+        range: [initialStartTime, initialEndTime]
       },
       yaxis: {
         range: [this.config.data.position.y1, this.config.data.position.y2]
@@ -360,10 +435,7 @@ export default class setBasicParams extends Vue {
       }
     });
 
-
-
-    var requiredDotNum = this.temp.dataTimeAxis.length;
-    var reAskDataScale = 0.8;
+    //获取当前波形数据
     var zoom_xmax = this.temp.dataTimeAxis[this.temp.dataTimeAxis.length - 1];
     var zoom_xmin = this.temp.dataTimeAxis[0];
     var nowRange = zoom_xmax - zoom_xmin;
@@ -378,9 +450,7 @@ export default class setBasicParams extends Vue {
     var config = this.config;
     var tempUserInputData = this.tempUserInputData;
 
-    console.log("a");
     zoom();
-    console.log("b");
     function zoom() {
       console.log("c");
       myPlot.on("plotly_relayout", function(data: any) {
@@ -389,41 +459,64 @@ export default class setBasicParams extends Vue {
           var nowZoom_xmin = data["xaxis.range[0]"];
           var nowZoom_xmax = data["xaxis.range[1]"];
           var x_range = nowZoom_xmax - nowZoom_xmin;
-          var newZoomedDotNum = Math.round((x_range * nowDotNum) / nowRange);
-          nowRange = x_range;
-          nowDotNum = newZoomedDotNum;
+
+          expansionStartTime = Number(nowZoom_xmin)-expansionMultiple*x_range >= xmin?Number(nowZoom_xmin)-expansionMultiple*x_range:xmin;
+          expansionEndTime =  Number(nowZoom_xmax)+expansionMultiple*x_range <= xmax? Number(nowZoom_xmax)+expansionMultiple*x_range:xmax;
+    
           if (
-            nowDotNum < requiredDotNum * 0.5 ||
-            nowZoom_xmin < zoom_xmin ||
-            nowZoom_xmax > zoom_xmax
+              expansionStartTime < zoom_xmin ||  
+              expansionEndTime > zoom_xmax ||
+              ((x_range/nowRange)*nowDotNum < expectedDotNum)
           ) {
-            zoom_xmax = nowZoom_xmax;
-            zoom_xmin = nowZoom_xmin;
+            //重新给一遍值
+            zoom_xmax = expansionEndTime;
+            zoom_xmin = expansionStartTime;
             var zoom_ymin = data["yaxis.range[0]"];
             var zoom_ymax = data["yaxis.range[1]"];
-            var params = [zoom_xmin * reAskDataScale, zoom_xmax / reAskDataScale, requiredDotNum]
-            var index = 0;
-            for(var key of tempUserInputData.keys()){
-              tempUserInputData.set(key, params[index]);
-              index++;
-            }
+            nowRange = zoom_xmax - zoom_xmin;
+
+            expansionDotNum = Math.floor(((Number(expansionEndTime)- Number(expansionStartTime)) / (Number(nowZoom_xmax)- Number(nowZoom_xmin)) )*expectedDotNum)+1;
+
+            getInputData.set("startTime", expansionStartTime);
+            getInputData.set("endTime",expansionEndTime);
+            getInputData.set("count",expansionDotNum);
+
             var url = pathProcessor.FillPathWithVar(
-              tempUserInputData,
+              getInputData,
               config.data.url.path
             );
+
+            getData(url);
+
+            //当点不够时取全部点并重新获取y轴
+            if(temp.data == null)
+            {
+              getInputData.set("count","0");
+              url = pathProcessor.FillPathWithVar(
+              getInputData,
+              config.data.url.path
+              );
+              getData(url);
+            }
+
+
             var timeUrl = pathProcessor.FillPathWithVar(
-              tempUserInputData,
+              getInputData,
               config.data.url.timePath
             );
             console.log(url);
             console.log(timeUrl);
+
+            
+            getDataTimeAxis(timeUrl);
+
+
             getConfig.data.position.x1 = zoom_xmin;
             getConfig.data.position.x2 = zoom_xmax;
             getConfig.data.position.y1 = zoom_ymin;
             getConfig.data.position.y2 = zoom_ymax;
             updateConfig();
-            // getData(url);
-            // getDataTimeAxis(timeUrl);
+
             var data_update = [
               {
                 x: temp.dataTimeAxis,
@@ -432,7 +525,7 @@ export default class setBasicParams extends Vue {
             ];
             var layout_update = {
               xaxis: {
-                range: [zoom_xmin, zoom_xmax]
+                range: [data["xaxis.range[0]"],  data["xaxis.range[1]"]]
               },
               yaxis: {
                 range: [zoom_ymin, zoom_ymax]
@@ -465,9 +558,11 @@ export default class setBasicParams extends Vue {
   }
   async getData(url: any) {
     var apiLoad = url;
-    console.log(apiLoad);//改
+    console.log("getData");//改
     await axios.get(apiLoad).then(response => {
       this.temp.data = response.data.CFET2CORE_SAMPLE_VAL;
+      console.log(apiLoad);
+      console.log(response);
     });
   }
   async getDataTimeAxis(url: any) {
