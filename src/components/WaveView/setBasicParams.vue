@@ -75,6 +75,11 @@ export default class setBasicParams extends Vue {
   ExpectedDotNum:number = 1000;
   ExpansionMultiple:number = 1;
   annotations:any;
+  myPlot:any;
+  data_initial:any;
+  xmin:any;
+  xmax:any;
+  nowDotNum:any;
 
   created() {
     this.config.data.userInputData = this.userInputData;
@@ -244,28 +249,28 @@ export default class setBasicParams extends Vue {
     );
     console.log(timeUrl);
     await this.getDataTimeAxis(timeUrl);
-    var xmin =  this.temp.dataTimeAxis[0];
-    var xmax =  this.temp.dataTimeAxis[1];
+    this.xmin =  this.temp.dataTimeAxis[0];
+    this.xmax =  this.temp.dataTimeAxis[1];
     console.log("边界");
-    console.log(xmin);
-    console.log(xmax);
+    console.log(this.xmin);
+    console.log(this.xmax);
 
     var expansionStartTime:any ;
     var expansionEndTime:any;
-    var expansionDotNum:any
+    var expansionDotNum:any;
 
     //向左右扩展范围获取数据
     if(initialStartTime == 0 && initialEndTime == 0)
     {
-      initialStartTime = xmin;
-      initialEndTime = xmax;
-      expansionStartTime = xmin;
-      expansionEndTime = xmax;
+      initialStartTime = this.xmin;
+      initialEndTime = this.xmax;
+      expansionStartTime = this.xmin;
+      expansionEndTime = this.xmax;
       expansionDotNum = expectedDotNum;
     }
     else{
-      expansionStartTime= Number(initialStartTime)-expansionMultiple*initialRange>= xmin?Number(initialStartTime)-expansionMultiple*initialRange:xmin;
-      expansionEndTime= Number(initialEndTime)+expansionMultiple*initialRange <= xmax?Number(initialEndTime)+expansionMultiple*initialRange:xmax;
+      expansionStartTime= Number(initialStartTime)-expansionMultiple*initialRange>= this.xmin?Number(initialStartTime)-expansionMultiple*initialRange:this.xmin;
+      expansionEndTime= Number(initialEndTime)+expansionMultiple*initialRange <= this.xmax?Number(initialEndTime)+expansionMultiple*initialRange:this.xmax;
       expansionDotNum =Math.floor(((Number(expansionEndTime)- Number(expansionStartTime)) / (Number(initialEndTime)- Number(initialStartTime)) )*expectedDotNum)+1;
     }
 
@@ -318,15 +323,15 @@ export default class setBasicParams extends Vue {
     this.$emit("getPathId", dealPath);
 
 
-    var myPlot = this.wave;
-    var data_initial = [
+    this.myPlot = this.wave;
+    this.data_initial = [
       {
         x: this.temp.dataTimeAxis,
         y: this.temp.data
       }
     ];
     console.log("data_initial:");
-    console.log(data_initial);
+    console.log(this.data_initial);
     var layout_initial = {
       xaxis: {
         range: [initialStartTime, initialEndTime]
@@ -339,23 +344,23 @@ export default class setBasicParams extends Vue {
       autosize:true
     };
     console.log(layout_initial);
-    this.createChannelChart(myPlot, data_initial, layout_initial);
+    this.createChannelChart(this.myPlot, this.data_initial, layout_initial);
     this.updateConfig();
 
 
     PubSub.subscribe('PlotlyClick',(messageName:string, Args:any)=>{
         console.log("subscribe");
         console.log(Args);
-        var nearestIndex:number = this.findNearest(data_initial[0].x, 0 , data_initial[0].x.length-1, Args.x)
+        var nearestIndex:number = this.findNearest(this.data_initial[0].x, 0 , this.data_initial[0].x.length-1, Args.x)
         console.log(nearestIndex);
-        console.log(data_initial[0].x[nearestIndex]);
+        console.log(this.data_initial[0].x[nearestIndex]);
 
-        var annotate_text = 'x = '+data_initial[0].x[nearestIndex] +
-                        'y = '+data_initial[0].y[nearestIndex];
+        var annotate_text = 'x = '+this.data_initial[0].x[nearestIndex] +
+                        'y = '+this.data_initial[0].y[nearestIndex];
         var annotation = {
             text: annotate_text,
-            x: data_initial[0].x[nearestIndex],
-            y: data_initial[0].y[nearestIndex]
+            x: this.data_initial[0].x[nearestIndex],
+            y: this.data_initial[0].y[nearestIndex]
           }
         this.annotations = [];
         this.annotations.push(annotation);
@@ -365,7 +370,7 @@ export default class setBasicParams extends Vue {
         };
       
 
-       Plotly.relayout(myPlot,layout_update);
+       Plotly.relayout(this.myPlot,layout_update);
     });
 
      PubSub.subscribe('SynchronizeXY',(messageName:string, Args:any)=>{
@@ -382,7 +387,7 @@ export default class setBasicParams extends Vue {
         };
       
 
-       Plotly.relayout(myPlot,layout_update);
+       Plotly.relayout(this.myPlot,layout_update);
     });
 
     PubSub.subscribe('SynchronizeX',(messageName:string, Args:any)=>{
@@ -396,7 +401,7 @@ export default class setBasicParams extends Vue {
         };
       
 
-       Plotly.relayout(myPlot,layout_update);
+       Plotly.relayout(this.myPlot,layout_update);
     });
 
     PubSub.subscribe('SynchronizeY',(messageName:string, Args:any)=>{
@@ -409,10 +414,10 @@ export default class setBasicParams extends Vue {
               }
         };
       
-       Plotly.relayout(myPlot,layout_update);
+       Plotly.relayout(this.myPlot,layout_update);
     });
 
-    myPlot.on("plotly_click", function(data:any) {
+    this.myPlot.on("plotly_click", (data:any) =>{
         //当前区域的范围
         console.log(data.points[0].xaxis.range);
         console.log(data.points[0].yaxis.range);
@@ -431,56 +436,114 @@ export default class setBasicParams extends Vue {
           var annotations = [];
           annotations.push(annotation);
 
-          Plotly.relayout(myPlot,{annotations: annotations});
+          Plotly.relayout(this.myPlot,{annotations: annotations});
           PubSub.publish('PlotlyClick',{x:data.points[i].x,y:data.points[i].y.toPrecision(4)});
       }
     });
 
     //获取当前波形数据
-    var zoom_xmax = this.temp.dataTimeAxis[this.temp.dataTimeAxis.length - 1];
-    var zoom_xmin = this.temp.dataTimeAxis[0];
-    var nowRange = zoom_xmax - zoom_xmin;
-    var nowDotNum = this.temp.dataTimeAxis.length;
-    var getData = this.getData;
-    var getDataTimeAxis = this.getDataTimeAxis;
-    var createChannelChart = this.createChannelChart;
-    var temp = this.temp;
-    var getConfig = this.getConfig;
-    var updateConfig = this.updateConfig;
-    var pathProcessor = this.pathProcessor
-    var config = this.config;
-    var tempUserInputData = this.tempUserInputData;
-    var addAnnotations = this.addAnnotations;
 
-    zoom();
-    function zoom() {
+
+    this.zoom();
+
+    
+  }
+
+  zoom() {
       console.log("c");
-      myPlot.on("plotly_relayout", (data: any)=> {
+      var createChannelChart = this.createChannelChart;
+      var addAnnotations = this.addAnnotations;
+      var getData = this.getData;
+      var getDataTimeAxis = this.getDataTimeAxis;
+      var getConfig = this.getConfig;
+      var updateConfig = this.updateConfig;
+      var pathProcessor = this.pathProcessor
+
+      
+      var zoom_xmax = this.temp.dataTimeAxis[this.nowDotNum - 1];
+      var zoom_xmin = this.temp.dataTimeAxis[0];
+      var zoom_ymax = this.temp.data[this.nowDotNum - 1];
+      var zoom_ymin = this.temp.data[0];
+      var nowRange = zoom_xmax - zoom_xmin;
+      var temp = this.temp;
+
+      this.myPlot.on("plotly_relayout", (data: any)=> {
+
+      var zoom_xmax = this.temp.dataTimeAxis[this.nowDotNum - 1];
+      var zoom_xmin = this.temp.dataTimeAxis[0];
+      var zoom_ymax = this.temp.data[this.nowDotNum - 1];
+      var zoom_ymin = this.temp.data[0];
+      var nowRange = zoom_xmax - zoom_xmin;
+      var temp = this.temp;
+      var config = this.config;
+      var tempUserInputData = this.tempUserInputData;
+      var expansionMultiple = this.ExpansionMultiple;
+      var expectedDotNum = this.ExpectedDotNum;
+      var expansionStartTime:any ;
+      var expansionEndTime:any;
+      var expansionDotNum:any;
+
+
         console.log("d");
         console.log(data);
-        if (!data["xaxis.autorange"] && data["xaxis.range[0]"]) {
-          var nowZoom_xmin = data["xaxis.range[0]"];
-          var nowZoom_xmax = data["xaxis.range[1]"];
-          var x_range = nowZoom_xmax - nowZoom_xmin;
+        if (!data["xaxis.autorange"] &&(data["xaxis.range[0]"] || data["xaxis"]) ) {
+          var nowZoom_xmin;
+          var nowZoom_xmax;
+          
+          if(data["xaxis"])
+          {
+             console.log("x");
+             nowZoom_xmin = data["xaxis"]["range"][0];
+             nowZoom_xmax = data["xaxis"]["range"][1];
+             if(data["yaxis"])
+             {
+                console.log("y");
+                zoom_ymin = data["yaxis"]["range"][0];
+                zoom_ymax = data["yaxis"]["range"][1];
+             }
+          }
+          else if(data["xaxis.range[0]"])
+          {
+            nowZoom_xmin = data["xaxis.range[0]"];
+            nowZoom_xmax = data["xaxis.range[1]"]; 
+            zoom_ymin = data["yaxis.range[0]"];
+            zoom_ymax = data["yaxis.range[1]"];
+          }
+          console.log(nowZoom_xmin);
+          console.log(nowZoom_xmax);
+          console.log(zoom_xmax);
+          console.log(zoom_xmin);
 
-          expansionStartTime = Number(nowZoom_xmin)-expansionMultiple*x_range >= xmin?Number(nowZoom_xmin)-expansionMultiple*x_range:xmin;
-          expansionEndTime =  Number(nowZoom_xmax)+expansionMultiple*x_range <= xmax? Number(nowZoom_xmax)+expansionMultiple*x_range:xmax;
-          console.log(nowDotNum);
-          console.log((x_range/nowRange)*nowDotNum);
+          var x_range = nowZoom_xmax - nowZoom_xmin;
           if (
-              expansionStartTime < zoom_xmin ||  
-              expansionEndTime > zoom_xmax ||
-              ((x_range/nowRange)*nowDotNum < expectedDotNum)
+              nowZoom_xmin < zoom_xmin ||  
+              nowZoom_xmax > zoom_xmax ||
+              ((x_range/nowRange)*this.nowDotNum < expectedDotNum)
           ) {
+
+
+          expansionStartTime = Number(nowZoom_xmin)-expansionMultiple*x_range >= this.xmin?Number(nowZoom_xmin)-expansionMultiple*x_range:this.xmin;
+          expansionEndTime =  Number(nowZoom_xmax)+expansionMultiple*x_range <= this.xmax? Number(nowZoom_xmax)+expansionMultiple*x_range:this.xmax;
+          console.log(expansionStartTime);
+          console.log(expansionEndTime);
+          console.log(this.nowDotNum);
+          console.log((x_range/nowRange)*this.nowDotNum);
+
+
+            console.log("重加载");
+            console.log(expansionStartTime < zoom_xmin);
+            console.log(expansionEndTime > zoom_xmax);
+            console.log(expansionEndTime);
+            console.log(zoom_xmax);
+            console.log( ((x_range/nowRange)*this.nowDotNum < expectedDotNum));
             //重新给一遍值
             zoom_xmax = expansionEndTime;
             zoom_xmin = expansionStartTime;
-            var zoom_ymin = data["yaxis.range[0]"];
-            var zoom_ymax = data["yaxis.range[1]"];
             nowRange = zoom_xmax - zoom_xmin;
 
             expansionDotNum = Math.floor(((Number(expansionEndTime)- Number(expansionStartTime)) / (Number(nowZoom_xmax)- Number(nowZoom_xmin)) )*expectedDotNum)+1;
 
+            var getInputData = this.tempUserInputData;
             getInputData.set("startTime", expansionStartTime);
             getInputData.set("endTime",expansionEndTime);
             getInputData.set("count",expansionDotNum);
@@ -513,9 +576,6 @@ export default class setBasicParams extends Vue {
 
             
             getDataTimeAxis(timeUrl);
-            nowDotNum = temp.dataTimeAxis.length;
-
-
             getConfig.data.position.x1 = zoom_xmin;
             getConfig.data.position.x2 = zoom_xmax;
             getConfig.data.position.y1 = zoom_ymin;
@@ -530,25 +590,30 @@ export default class setBasicParams extends Vue {
             ];
             var layout_update = {
               xaxis: {
-                range: [data["xaxis.range[0]"],  data["xaxis.range[1]"]]
+                range: [nowZoom_xmin, nowZoom_xmax]
               },
               yaxis: {
                 range: [zoom_ymin, zoom_ymax]
-              }
+              },
+              annotations: this.annotations
             };
-            createChannelChart(myPlot, data_update, layout_update);
-            zoom();
+
+            createChannelChart(this.myPlot, data_update, layout_update);
+            this.zoom();
           }
         }
       });
-      myPlot.on("plotly_doubleclick", function() {
-        nowRange = temp.dataTimeAxis[temp.dataTimeAxis.length - 1];
-        nowDotNum = temp.dataTimeAxis.length;
-        createChannelChart(myPlot, data_initial);
-        zoom();
+
+      this.myPlot.on("plotly_doubleclick", ()=> {
+        nowRange = temp.dataTimeAxis[this.nowDotNum - 1];
+        createChannelChart(this.myPlot, this.data_initial);
+        this.zoom();
       });
 
-      myPlot.on("plotly_click", function(data:any){
+
+
+
+      this.myPlot.on("plotly_click", (data:any)=>{
         //当前区域的范围
         console.log("plotly_click")
         console.log(data.points[0].xaxis.range);
@@ -559,7 +624,7 @@ export default class setBasicParams extends Vue {
           var annotate_text = 'x = '+data.points[i].x +
                         'y = '+data.points[i].y.toPrecision(4);
 
-          var annotation = {
+          var annotation = {  
             text: annotate_text,
             x: data.points[i].x,
             y: parseFloat(data.points[i].y.toPrecision(4))
@@ -568,12 +633,12 @@ export default class setBasicParams extends Vue {
           var annotations = [];
           annotations.push(annotation);
           addAnnotations(annotations);
-          Plotly.relayout(myPlot,{annotations: annotations});
+          Plotly.relayout(this.myPlot,{annotations: annotations});
           PubSub.publish('PlotlyClick',{x:data.points[i].x,y:data.points[i].y.toPrecision(4)});
         }
       });
     }
-  }
+
 
   addAnnotations(annotations:any)
   {
@@ -589,19 +654,13 @@ export default class setBasicParams extends Vue {
     };
 
     Plotly.newPlot(myPlot, data_update, data_layout, config);
-
-    if(this.annotations)
-    {
-        console.log("createChannelChart");
-       Plotly.relayout(myPlot,{annotations: this.annotations});
-    }
   }
 
   async getData(url: any) {
-    var apiLoad = url;
-    console.log("getData");//改
+    var apiLoad = url;//改
     await axios.get(apiLoad).then(response => {
       this.temp.data = response.data.CFET2CORE_SAMPLE_VAL;
+       console.log("getData");
       console.log(apiLoad);
       console.log(response);
     });
@@ -610,6 +669,11 @@ export default class setBasicParams extends Vue {
     var apiLoad = url;
     await axios.get(apiLoad).then(response => {
       this.temp.dataTimeAxis = response.data.CFET2CORE_SAMPLE_VAL;
+          console.log("getDataTimeAxis");
+      console.log(apiLoad);
+      console.log(response);
+      this.nowDotNum = response.data.CFET2CORE_SAMPLE_VAL.length;
+      console.log(this.nowDotNum);
     });
   }
 }
