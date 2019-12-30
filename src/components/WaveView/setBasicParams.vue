@@ -458,8 +458,6 @@ export default class setBasicParams extends Vue {
       var getConfig = this.getConfig;
       var updateConfig = this.updateConfig;
       var pathProcessor = this.pathProcessor
-
-      
       var zoom_xmax = this.temp.dataTimeAxis[this.nowDotNum - 1];
       var zoom_xmin = this.temp.dataTimeAxis[0];
       var zoom_ymax = this.temp.data[this.nowDotNum - 1];
@@ -486,9 +484,13 @@ export default class setBasicParams extends Vue {
 
         console.log("d");
         console.log(data);
+
+
         if (!data["xaxis.autorange"] &&(data["xaxis.range[0]"] || data["xaxis"]) ) {
           var nowZoom_xmin;
           var nowZoom_xmax;
+
+
           
           if(data["xaxis"])
           {
@@ -588,15 +590,36 @@ export default class setBasicParams extends Vue {
                 y: temp.data
               }
             ];
-            var layout_update = {
-              xaxis: {
-                range: [nowZoom_xmin, nowZoom_xmax]
-              },
-              yaxis: {
-                range: [zoom_ymin, zoom_ymax]
-              },
-              annotations: this.annotations
-            };
+            console.log("data_update");
+            console.log(data_update);
+
+
+            var myplot = this.wave;
+            var yRange = myplot.layout.yaxis.range;
+            console.log(yRange);
+            if(!data["yaxis"]&&!data["yaxis.range[0]"])
+            {
+                var layout_update = {
+                xaxis: {
+                  range: [nowZoom_xmin, nowZoom_xmax]
+                },
+                yaxis: {
+                  range: [yRange[0], yRange[1]]
+                },
+                annotations: this.annotations
+              };
+            }
+            else{
+                var layout_update = {
+                xaxis: {
+                  range: [nowZoom_xmin, nowZoom_xmax]
+                },
+                yaxis: {
+                  range: [zoom_ymin, zoom_ymax]
+                },
+                annotations: this.annotations
+              };
+            }
 
             createChannelChart(this.myPlot, data_update, layout_update);
             this.zoom();
