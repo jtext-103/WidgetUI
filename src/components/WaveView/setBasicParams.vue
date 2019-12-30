@@ -74,6 +74,7 @@ export default class setBasicParams extends Vue {
   temp: any = {};
   ExpectedDotNum:number = 1000;
   ExpansionMultiple:number = 1;
+  annotations:any;
 
   created() {
     this.config.data.userInputData = this.userInputData;
@@ -356,11 +357,11 @@ export default class setBasicParams extends Vue {
             x: data_initial[0].x[nearestIndex],
             y: data_initial[0].y[nearestIndex]
           }
-        var annotations = [];
-          annotations.push(annotation);
+        this.annotations = [];
+        this.annotations.push(annotation);
 
         var layout_update = {
-              annotations: annotations
+              annotations: this.annotations
         };
       
 
@@ -449,20 +450,23 @@ export default class setBasicParams extends Vue {
     var pathProcessor = this.pathProcessor
     var config = this.config;
     var tempUserInputData = this.tempUserInputData;
+    var addAnnotations = this.addAnnotations;
 
     zoom();
     function zoom() {
       console.log("c");
-      myPlot.on("plotly_relayout", function(data: any) {
+      myPlot.on("plotly_relayout", (data: any)=> {
         console.log("d");
-        if (!data["xaxis.autorange"]) {
+        console.log(data);
+        if (!data["xaxis.autorange"] && data["xaxis.range[0]"]) {
           var nowZoom_xmin = data["xaxis.range[0]"];
           var nowZoom_xmax = data["xaxis.range[1]"];
           var x_range = nowZoom_xmax - nowZoom_xmin;
 
           expansionStartTime = Number(nowZoom_xmin)-expansionMultiple*x_range >= xmin?Number(nowZoom_xmin)-expansionMultiple*x_range:xmin;
           expansionEndTime =  Number(nowZoom_xmax)+expansionMultiple*x_range <= xmax? Number(nowZoom_xmax)+expansionMultiple*x_range:xmax;
-    
+          console.log(nowDotNum);
+          console.log((x_range/nowRange)*nowDotNum);
           if (
               expansionStartTime < zoom_xmin ||  
               expansionEndTime > zoom_xmax ||
@@ -509,6 +513,7 @@ export default class setBasicParams extends Vue {
 
             
             getDataTimeAxis(timeUrl);
+            nowDotNum = temp.dataTimeAxis.length;
 
 
             getConfig.data.position.x1 = zoom_xmin;
@@ -542,10 +547,39 @@ export default class setBasicParams extends Vue {
         createChannelChart(myPlot, data_initial);
         zoom();
       });
+
+      myPlot.on("plotly_click", function(data:any){
+        //当前区域的范围
+        console.log("plotly_click")
+        console.log(data.points[0].xaxis.range);
+        console.log(data.points[0].yaxis.range);
+        console.log(data);
+        var pts = '';
+        for(var i=0; i < data.points.length; i++){
+          var annotate_text = 'x = '+data.points[i].x +
+                        'y = '+data.points[i].y.toPrecision(4);
+
+          var annotation = {
+            text: annotate_text,
+            x: data.points[i].x,
+            y: parseFloat(data.points[i].y.toPrecision(4))
+          }
+
+          var annotations = [];
+          annotations.push(annotation);
+          addAnnotations(annotations);
+          Plotly.relayout(myPlot,{annotations: annotations});
+          PubSub.publish('PlotlyClick',{x:data.points[i].x,y:data.points[i].y.toPrecision(4)});
+        }
+      });
     }
-
-
   }
+
+  addAnnotations(annotations:any)
+  {
+    this.annotations = annotations;
+  }
+
   createChannelChart(myPlot: any, data_update: any, data_layout: any = {}) {
     data_layout.margin = { t: 20 };
 
@@ -555,7 +589,14 @@ export default class setBasicParams extends Vue {
     };
 
     Plotly.newPlot(myPlot, data_update, data_layout, config);
+
+    if(this.annotations)
+    {
+        console.log("createChannelChart");
+       Plotly.relayout(myPlot,{annotations: this.annotations});
+    }
   }
+
   async getData(url: any) {
     var apiLoad = url;
     console.log("getData");//改
