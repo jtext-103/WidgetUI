@@ -80,6 +80,7 @@ export default class setBasicParams extends Vue {
   xmin:any;
   xmax:any;
   nowDotNum:any;
+  GetAllDot:boolean = false;
 
   created() {
     this.config.data.userInputData = this.userInputData;
@@ -510,7 +511,7 @@ export default class setBasicParams extends Vue {
             nowZoom_xmax = data["xaxis.range[1]"]; 
             zoom_ymin = data["yaxis.range[0]"];
             zoom_ymax = data["yaxis.range[1]"];
-          }
+          }   
           console.log(nowZoom_xmin);
           console.log(nowZoom_xmax);
           console.log(zoom_xmax);
@@ -520,10 +521,10 @@ export default class setBasicParams extends Vue {
           if (
               nowZoom_xmin < zoom_xmin ||  
               nowZoom_xmax > zoom_xmax ||
-              ((x_range/nowRange)*this.nowDotNum < expectedDotNum)
+              (((x_range/nowRange)*this.nowDotNum < expectedDotNum)&&(this.GetAllDot==false))
           ) {
-
-
+ 
+          this.GetAllDot = false;
           expansionStartTime = Number(nowZoom_xmin)-expansionMultiple*x_range >= this.xmin?Number(nowZoom_xmin)-expansionMultiple*x_range:this.xmin;
           expansionEndTime =  Number(nowZoom_xmax)+expansionMultiple*x_range <= this.xmax? Number(nowZoom_xmax)+expansionMultiple*x_range:this.xmax;
           console.log(expansionStartTime);
@@ -550,50 +551,7 @@ export default class setBasicParams extends Vue {
             getInputData.set("endTime",expansionEndTime);
             getInputData.set("count",expansionDotNum);
 
-            var url = pathProcessor.FillPathWithVar(
-              getInputData,
-              config.data.url.path
-            );
-
-            getData(url);
-
-            //当点不够时取全部点并重新获取y轴
-            if(temp.data == null)
-            {
-              getInputData.set("count","0");
-              url = pathProcessor.FillPathWithVar(
-              getInputData,
-              config.data.url.path
-              );
-              getData(url);
-            }
-
-
-            var timeUrl = pathProcessor.FillPathWithVar(
-              getInputData,
-              config.data.url.timePath
-            );
-            console.log(url);
-            console.log(timeUrl);
-
             
-            getDataTimeAxis(timeUrl);
-            getConfig.data.position.x1 = zoom_xmin;
-            getConfig.data.position.x2 = zoom_xmax;
-            getConfig.data.position.y1 = zoom_ymin;
-            getConfig.data.position.y2 = zoom_ymax;
-            updateConfig();
-
-            var data_update = [
-              {
-                x: temp.dataTimeAxis,
-                y: temp.data
-              }
-            ];
-            console.log("data_update");
-            console.log(data_update);
-
-
             var myplot = this.wave;
             var yRange = myplot.layout.yaxis.range;
             console.log(yRange);
@@ -621,24 +579,25 @@ export default class setBasicParams extends Vue {
               };
             }
 
-            createChannelChart(this.myPlot, data_update, layout_update);
-            this.zoom();
+            getConfig.data.position.x1 = zoom_xmin;
+            getConfig.data.position.x2 = zoom_xmax;
+            getConfig.data.position.y1 = zoom_ymin;
+            getConfig.data.position.y2 = zoom_ymax;
+            updateConfig();
+            this.showPlot(getInputData,layout_update,this.myPlot);
           }
         }
       });
 
-      this.myPlot.on("plotly_doubleclick", ()=> {
-        nowRange = temp.dataTimeAxis[this.nowDotNum - 1];
-        createChannelChart(this.myPlot, this.data_initial);
-        this.zoom();
-      });
-
-
-
+      // this.myPlot.on("plotly_doubleclick", ()=> {
+      //   console.log("plotly_doubleclick");
+      //   createChannelChart(this.myPlot, this.data_initial);
+      //   this.zoom();
+      // });
 
       this.myPlot.on("plotly_click", (data:any)=>{
         //当前区域的范围
-        console.log("plotly_click")
+        console.log("plotly_click");
         console.log(data.points[0].xaxis.range);
         console.log(data.points[0].yaxis.range);
         console.log(data);
@@ -653,7 +612,7 @@ export default class setBasicParams extends Vue {
             y: parseFloat(data.points[i].y.toPrecision(4))
           }
 
-          var annotations = [];
+          var annotations = [];   
           annotations.push(annotation);
           addAnnotations(annotations);
           Plotly.relayout(this.myPlot,{annotations: annotations});
@@ -661,6 +620,50 @@ export default class setBasicParams extends Vue {
         }
       });
     }
+
+  async showPlot(getInputData:any,layout_update:any,myPlot:any)
+  {
+    var url = this.pathProcessor.FillPathWithVar(
+              getInputData,
+              this.config.data.url.path
+     );
+    await this.getData(url);
+    console.log("重加载getData");
+    console.log(this.temp.data);
+
+    //当点不够时取全部点并重新获取y轴
+    if(this.temp.data == null)
+    {
+      getInputData.set("count","0");
+      this.GetAllDot = true;
+      url = this.pathProcessor.FillPathWithVar(
+      getInputData,
+      this.config.data.url.path
+      );
+      await this.getData(url);
+    }
+    var timeUrl = this.pathProcessor.FillPathWithVar(
+      getInputData,
+      this.config.data.url.timePath
+    );
+    console.log(url);
+    console.log(timeUrl);
+
+    await this.getDataTimeAxis(timeUrl);
+    console.log("重加载getDataTimeAxis");
+    console.log(this.temp.dataTimeAxis);
+
+    var data_update = [
+      {
+        x: this.temp.dataTimeAxis,
+        y: this.temp.data
+      }
+    ];
+    console.log("data_update");
+    console.log(data_update);
+    this.createChannelChart(myPlot, data_update, layout_update);
+    this.zoom();
+  }
 
 
   addAnnotations(annotations:any)
